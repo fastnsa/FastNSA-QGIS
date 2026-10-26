@@ -1,14 +1,12 @@
 """Processing provider for FastNSA."""
 
-from pathlib import Path
-
-from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsProcessingProvider
 
 from .algorithms.nearest_edge import FastNearestEdgeMatchingAlgorithm
 from .algorithms.network_k_function import FastNetworkKFunctionAlgorithm
 from .algorithms.network_kde import FastNetworkKdeAlgorithm
 from .algorithms.spatiotemporal_network_k_function import FastSpatiotemporalNetworkKFunctionAlgorithm
+from .utils.icons import plugin_icon, plugin_icon_path
 
 
 class FastNsaProvider(QgsProcessingProvider):
@@ -33,10 +31,10 @@ class FastNsaProvider(QgsProcessingProvider):
         return self.PROVIDER_NAME
 
     def icon(self):
-        return QIcon(self.iconPath())
+        return plugin_icon()
 
     def iconPath(self):
-        return str(Path(__file__).resolve().parent / "resources" / "icon.png")
+        return plugin_icon_path()
 
     def supportsNonFileBasedOutput(self):
         return True

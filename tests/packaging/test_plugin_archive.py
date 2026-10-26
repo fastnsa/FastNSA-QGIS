@@ -5,9 +5,11 @@ import configparser
 import json
 from pathlib import Path
 import platform
+import struct
 import tempfile
 import unittest
 import zipfile
+import zlib
 from unittest.mock import patch
 
 
@@ -26,6 +28,29 @@ validator = load_tool("candidate_validator", "validate_package.py")
 
 
 class PluginArchiveTest(unittest.TestCase):
+    def test_icon_resources_are_valid_multiresolution_pngs(self):
+        for size in (16, 24, 32, 48, 64, 96, 128, 256):
+            filename = "icon.png" if size == 256 else f"icon_{size}.png"
+            with self.subTest(size=size):
+                data = (builder.PLUGIN_SOURCE / "resources" / filename).read_bytes()
+                self.assertEqual(data[:8], b"\x89PNG\r\n\x1a\n")
+                self.assertEqual(data[12:16], b"IHDR")
+                self.assertEqual(struct.unpack(">II", data[16:24]), (size, size))
+                self.assertEqual(data[25], 6, "Icons must preserve RGBA transparency")
+                cursor = 8
+                last_type = None
+                while cursor < len(data):
+                    self.assertGreaterEqual(len(data) - cursor, 12)
+                    length = struct.unpack(">I", data[cursor:cursor + 4])[0]
+                    end = cursor + length + 12
+                    self.assertLessEqual(end, len(data))
+                    payload = data[cursor + 4:end - 4]
+                    checksum = struct.unpack(">I", data[end - 4:end])[0]
+                    self.assertEqual(zlib.crc32(payload), checksum)
+                    last_type = payload[:4]
+                    cursor = end
+                self.assertEqual(last_type, b"IEND")
+
     def test_metadata_describes_current_platforms_and_features(self):
         metadata = configparser.ConfigParser()
         metadata.read(builder.PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
@@ -117,6 +142,12 @@ class PluginArchiveTest(unittest.TestCase):
                 packaged_metadata.read_string(archive.read("fastnsa_qgis/metadata.txt").decode("utf-8"))
                 self.assertEqual(info["plugin_version"], source_metadata["general"]["version"])
                 self.assertEqual(packaged_metadata["general"], source_metadata["general"])
+                for size in (16, 24, 32, 48, 64, 96, 128, 256):
+                    filename = "icon.png" if size == 256 else f"icon_{size}.png"
+                    self.assertEqual(
+                        archive.read(f"fastnsa_qgis/resources/{filename}"),
+                        (builder.PLUGIN_SOURCE / "resources" / filename).read_bytes(),
+                    )
                 for relative in (
                     "gui/processing_widgets.py", "utils/analysis_options.py",
                     "utils/processing_outputs.py", "README.md", "README_ZH.md",

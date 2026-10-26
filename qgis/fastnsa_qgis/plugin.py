@@ -1,13 +1,11 @@
 """Plugin bootstrap for FastNSA."""
 
-from pathlib import Path
-
-from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 from qgis.core import QgsApplication
 
 from .gui.main_dialog import FastNSAMainDialog
 from .provider import FastNsaProvider
+from .utils.icons import plugin_icon
 
 
 class FastNsaPlugin:
@@ -27,8 +25,7 @@ class FastNsaPlugin:
             QgsApplication.processingRegistry().addProvider(self.provider)
 
         if self.action is None:
-            icon = QIcon(str(Path(__file__).resolve().parent / "resources" / "icon.png"))
-            self.action = QAction(icon, "Open FastNSA", self.iface.mainWindow())
+            self.action = QAction(plugin_icon(), "Open FastNSA", self.iface.mainWindow())
             self.action.triggered.connect(self.open_main_dialog)
             self.iface.addToolBarIcon(self.action)
             self.iface.addPluginToMenu(self.menu_name, self.action)
