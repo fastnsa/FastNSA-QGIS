@@ -53,5 +53,5 @@ and
 [release validation](https://docs.qgis.org/3.44/en/docs/pyqgis_developer_cookbook/plugins/releasing.html).
 
 Maintainer wheel-based archive creation steps are in the
-[plugin repository README](https://github.com/fastnsa/FastNSA-QGIS#runtime-boundary).
+[development guide](https://github.com/fastnsa/FastNSA-QGIS/blob/main/qgis/DEVELOPMENT.md).
 They are not part of the installed plugin documentation.

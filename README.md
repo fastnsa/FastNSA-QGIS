@@ -1,53 +1,67 @@
-# FastNSA QGIS Plugin
+# FastNSA for QGIS
 
-QGIS integration for nearest-edge preprocessing, network density, network
-K-function, and spatiotemporal network K-function.
+FastNSA brings network-constrained spatial analysis to QGIS. It provides an
+interactive analysis workspace and Processing Toolbox algorithms for exploring
+point events on road networks.
 
-- [Installation and user guide](qgis/README.md)
+## Features
+
+| Workflow | Purpose | Outputs |
+| --- | --- | --- |
+| Nearest-edge matching | Locate events on the network | Matched points with reusable edge IDs and offsets |
+| Network KDE / NKDV | Explore network density with ADA or LION | Density-valued line segments and graduated styles |
+| Network K-function | Analyze spatial point patterns with NS or STARS | Result tables, charts, and Monte Carlo envelopes |
+| Spatiotemporal network K-function | Analyze patterns across distance and time | Result tables, 2D surfaces, and optional Matplotlib 3D views |
+
+The plugin supports temporary results, GeoPackage and CSV outputs, background
+execution, progress reporting, and cooperative cancellation.
+
+## Requirements
+
+- QGIS 3.34 through QGIS 3.x, using Qt5.
+- Python 3.11 or newer and NumPy in the QGIS environment.
+- A plugin package matching the operating system and CPU architecture.
+
+Current candidate packages target Linux x86_64 and Windows AMD64. macOS plugin
+packages and QGIS 4/Qt6 are not yet supported. Matplotlib is optional and enables
+interactive 3D surfaces.
+
+The installable ZIP includes the lightweight FastNSA runtime. GeoPandas,
+Shapely, NetworkX, and OSMnx are not required.
+
+## Installation
+
+1. Obtain the FastNSA plugin ZIP matching your operating system and architecture.
+2. In QGIS, open **Plugins > Manage and Install Plugins > Install from ZIP**.
+3. Select the ZIP, enable **FastNSA**, and open it from the toolbar or plugin menu.
+
+The four workflows are also available under **Processing Toolbox > FastNSA**.
+A GitHub source-code ZIP is not an installable plugin package.
+
+## Getting Started
+
+1. Load a road line layer in a projected CRS and a point event layer.
+2. Run **Fast Nearest Edge Matching** to prepare reusable event mappings.
+3. Use the matched points with the same road network for density, K-function,
+   or spatiotemporal K-function analysis.
+4. Inspect styled layers and result viewers, then save the outputs you need.
+
+Spatiotemporal analysis also requires an event time field. See the
+[time-field guide](qgis/docs/time-fields.md) for supported formats and units.
+
+## Documentation
+
+- [User guide](qgis/docs/index.md)
+- [Installation and dependencies](qgis/docs/installation.md)
+- [Workflow parameters](qgis/docs/workflows.md)
+- [Outputs and interpretation](qgis/docs/outputs-and-interpretation.md)
+- [Troubleshooting](qgis/docs/troubleshooting.md)
+- [Algorithm references](qgis/docs/references.md)
 - [Chinese introduction](qgis/README_ZH.md)
-- [Detailed documentation](qgis/docs/index.md)
-- [Dependencies](qgis/DEPENDENCIES.md)
-- [License](LICENSE)
-- [Source repository](https://github.com/fastnsa/FastNSA-QGIS)
-- [Issue tracker](https://github.com/fastnsa/FastNSA-QGIS/issues)
+- [Development guide](qgis/DEVELOPMENT.md)
 
-## Runtime Boundary
+## Support and License
 
-This repository does not duplicate the FastNSA C++ or Python package sources.
-`runtime-lock.json` pins the FastNSA version used to build plugin archives.
-Publish that runtime first. The generated packaging workflow downloads its
-platform wheel from PyPI only after the repository Actions variable
-`FASTNSA_RUNTIME_PUBLISHED` is set to `true`. Verify package ownership, version,
-and wheel provenance first. If the runtime is distributed elsewhere, configure
-that wheel source before enabling candidate builds. Source-packaging tests run
-without this opt-in.
-
-```bash
-python -m unittest discover -s tests/packaging -t . -v
-python -m pip download --only-binary=:all: --no-deps --dest wheelhouse fastnsa==0.2.0
-python qgis/package_plugin.py --wheel wheelhouse/<platform-wheel>.whl --output-dir dist
-python qgis/validate_package.py dist/<plugin-archive>.zip
-```
-
-Use the wheel matching the packaging host. ZIPs include a lightweight runtime
-and native dependencies; end users do not need a source checkout. To test the
-plugin source in a QGIS environment, install that wheel into `cache/runtime`
-with `pip install --target cache/runtime <wheel>` and set `FASTNSA_PYTHON_ROOT`
-to its absolute path and `PYTHONPATH` to this repository's `qgis/` plus QGIS's
-Python paths. Then run `python -m unittest discover -s tests/qgis -t . -v`.
-Do not use these development overrides for clean-profile ZIP acceptance.
-
-The source-packaging tests need only Python's standard library. QGIS tests
-need an actual QGIS environment and the pinned runtime; they do not import
-tests or sources from the Python package repository.
-
-Before public release, replace draft/private links, review the icon and
-notices, archive wheel hashes, and verify the final ZIP on supported hosts.
-`EXPORT_PROVENANCE.json` records the source snapshot and file hashes, not
-approval to publish. Windows/Linux candidate packaging does not imply macOS
-QGIS support.
-
-The self-contained ZIP is for project-controlled distribution. The
-[official QGIS plugin repository](https://plugins.qgis.org/docs/publish/)
-prohibits bundled binaries; a binary-free variant with external runtime
-dependency handling is not implemented yet.
+Report bugs and feature requests through the
+[issue tracker](https://github.com/fastnsa/FastNSA-QGIS/issues).
+FastNSA for QGIS is licensed under [LGPL-2.1-only](LICENSE).

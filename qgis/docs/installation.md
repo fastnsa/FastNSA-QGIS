@@ -80,5 +80,5 @@ comparing two release candidates.
 Do not use an editable Python installation to validate a public plugin ZIP. It
 can hide missing bundled modules and native libraries. Maintainer build and
 source-testing steps are in the
-[plugin repository README](https://github.com/fastnsa/FastNSA-QGIS#runtime-boundary),
+[development guide](https://github.com/fastnsa/FastNSA-QGIS/blob/main/qgis/DEVELOPMENT.md),
 which is intentionally excluded from the plugin archive.
