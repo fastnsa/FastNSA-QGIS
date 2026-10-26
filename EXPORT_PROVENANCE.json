@@ -1,0 +1,329 @@
+{
+  "exporter_sha256": "7bc41121a9ab103937bdedc6f0a8789ce88a79c3bdca8f9c5cd96329ebb726ef",
+  "files": [
+    {
+      "mode": "100644",
+      "path": ".github/workflows/multiplatform.yml",
+      "sha256": "b2b5caa1b81204fed62064cb385e083f7c565c6bdb1a69d7893e5f94fdee7376",
+      "source": "template:qgis-multiplatform.yml"
+    },
+    {
+      "mode": "100644",
+      "path": ".gitignore",
+      "sha256": "8d2a436176c6d202532549dd1256afb7f26afbd9504b7eeb20031d6408a0cd37",
+      "source": ".gitignore"
+    },
+    {
+      "mode": "100644",
+      "path": "LICENSE",
+      "sha256": "5fb011fc155156fb64214e15a5b614cc1b6f12a535fb14d2bfb61eb7b9d5afff",
+      "source": "python/LICENSE"
+    },
+    {
+      "mode": "100644",
+      "path": "README.md",
+      "sha256": "a6cc7c4864d58eeafb7cfe41d0eeed9f55906a36eb44311e819972cd23af1309",
+      "source": "template:qgis-README.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/DEPENDENCIES.md",
+      "sha256": "a5c5321f90eaa0728a386842e5a17dc9872cc5cfdaa73a59fac756a0c83a95d7",
+      "source": "qgis/DEPENDENCIES.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/README.md",
+      "sha256": "7ad787657d5600566c5928ee6e8c0f97ae4d0441e134975ce565380bfa0883e8",
+      "source": "qgis/README.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/README_ZH.md",
+      "sha256": "46f361f5de5bda7a417966b124412877cec105cdee031c7db79de477ee0103b6",
+      "source": "qgis/README_ZH.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/TIME_GUIDE_ZH.md",
+      "sha256": "47d799735a97bd4f3b7e5f0cf95103f266d7bc484b5408416a1fec282ac178f2",
+      "source": "qgis/docs/TIME_GUIDE_ZH.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/index.md",
+      "sha256": "85b413e2f437ff9aa592798272c4ff7e0a098926a4636ebbc68201a925482561",
+      "source": "qgis/docs/index.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/installation.md",
+      "sha256": "850e1f86622bf6efbdc6dd94d5f36b8b66367ddf015b4aa573cadbae04f6105a",
+      "source": "qgis/docs/installation.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/outputs-and-interpretation.md",
+      "sha256": "658a2cb68cdce9bd194960fc8c9e6917ec95255579bd314ceef66c6be77c4c1f",
+      "source": "qgis/docs/outputs-and-interpretation.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/quickstart.md",
+      "sha256": "152f4672fe66cf5e97929567dca9795dd1c4e7eab9e5a2e0eec6995f8c4d027f",
+      "source": "qgis/docs/quickstart.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/references.md",
+      "sha256": "cc3b1878ba29c978a85de9ad7200ecc87d71c26b055150ccf613044cc38fc0a9",
+      "source": "qgis/docs/references.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/time-fields.md",
+      "sha256": "3b02da15f9a6885202422dfaca709acaaca73159a4ba724d137fc6fe0d852f99",
+      "source": "qgis/docs/time-fields.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/troubleshooting.md",
+      "sha256": "2f49a154fae193a41551cecb2fb2de64c50b5b40957618d9f93c1002930e19a8",
+      "source": "qgis/docs/troubleshooting.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/docs/workflows.md",
+      "sha256": "1b1473d1a4b65176614df39a6be03ff202055487647919d3dbadcf391f1137d5",
+      "source": "qgis/docs/workflows.md"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/__init__.py",
+      "sha256": "e2adb46c31c2c7ec04f7932ce2992a07e3a9410f531f7639e2b908dfd4715463",
+      "source": "qgis/fastnsa_qgis/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/adapters/__init__.py",
+      "sha256": "7464a46533ce5e732266ce21b048876155ea35fd6e3c92e81b0776169c8371a1",
+      "source": "qgis/fastnsa_qgis/adapters/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/adapters/fastnsa_to_qgs.py",
+      "sha256": "ffc493cbae611abe4660d99b5da08cdfaf3dbd1fb9a63d621d415c1e762949ec",
+      "source": "qgis/fastnsa_qgis/adapters/fastnsa_to_qgs.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/adapters/qgs_to_fastnsa.py",
+      "sha256": "387f1ba5ef345226a35936c0ca6f3fc04ece9dd73b9776cb98e516197ec9b2c8",
+      "source": "qgis/fastnsa_qgis/adapters/qgs_to_fastnsa.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/algorithms/__init__.py",
+      "sha256": "cc97a7e21ee713cc8f0a5c4cede1177bcda09771b3123263068f5d758a792082",
+      "source": "qgis/fastnsa_qgis/algorithms/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/algorithms/nearest_edge.py",
+      "sha256": "fdc555bb6c7bce8a9c5993f93d6123ad799760e766553637a950ff19a87d8752",
+      "source": "qgis/fastnsa_qgis/algorithms/nearest_edge.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/algorithms/network_k_function.py",
+      "sha256": "5294f0079a26abf451b6f632abfb5e8b9390d2343ff33ab6310a8ae522c99142",
+      "source": "qgis/fastnsa_qgis/algorithms/network_k_function.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/algorithms/network_kde.py",
+      "sha256": "81ba737600d5ee91de145f300c708876a7249dfcfcff6e9bfcfd86ad16965bf5",
+      "source": "qgis/fastnsa_qgis/algorithms/network_kde.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/algorithms/spatiotemporal_network_k_function.py",
+      "sha256": "46d3c7544ce824dd591bb6eeb7a9c6f32636a71c78074407f5126703bfe98ee5",
+      "source": "qgis/fastnsa_qgis/algorithms/spatiotemporal_network_k_function.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/__init__.py",
+      "sha256": "7905c0e7ed3e7412e5f311cf5e83910bdeb36d1fcb719a23d8de16024fa4efe2",
+      "source": "qgis/fastnsa_qgis/gui/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/kfunction_chart_dialog.py",
+      "sha256": "342f1c004ee92c24ffe7f3f2c9370f8abe158f0d526845add8639e8014bd8605",
+      "source": "qgis/fastnsa_qgis/gui/kfunction_chart_dialog.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/main_dialog.py",
+      "sha256": "ee695ad1b9e656cb439021174f176b1caebd1b0be27ecdb5ece9c0fa53ba7873",
+      "source": "qgis/fastnsa_qgis/gui/main_dialog.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/parameter_panels.py",
+      "sha256": "7a4b32d26a1a861f2d99ef1e7873ebc0fe0023f85c89da09895c1f9bcaac16a1",
+      "source": "qgis/fastnsa_qgis/gui/parameter_panels.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/processing_widgets.py",
+      "sha256": "4e7704bac02a0583a17e29e39f0bbd63d877373134fdaf6245060f563c134fa2",
+      "source": "qgis/fastnsa_qgis/gui/processing_widgets.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/gui/st_kfunction_dialog.py",
+      "sha256": "78d7d533265f3f0942479a2c3b9a053a5cb8f919985c486053b839bf5cb9bcb5",
+      "source": "qgis/fastnsa_qgis/gui/st_kfunction_dialog.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/metadata.txt",
+      "sha256": "a9b8a0cfd5f4334ce73174d3ca2ff8132e7e0356814b801df3adb793b0db7bc7",
+      "source": "qgis/fastnsa_qgis/metadata.txt"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/plugin.py",
+      "sha256": "accd84790440d05a45c3452736761c6a174b9e8ab1701f09c146bf77a75a2785",
+      "source": "qgis/fastnsa_qgis/plugin.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/provider.py",
+      "sha256": "78f7fb4af442652cf0d84e9fb370612a34b9b1277bb988dba623999178c346d3",
+      "source": "qgis/fastnsa_qgis/provider.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/resources/icon.png",
+      "sha256": "ce4c49a40844515482b4322da5f9d7feb2df352960914c74813b0c20bb392cfe",
+      "source": "qgis/fastnsa_qgis/resources/icon.png"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/__init__.py",
+      "sha256": "024933172072c58cdf03aa62e1013463b958077fe2fd6fa0355e89129930bcbd",
+      "source": "qgis/fastnsa_qgis/utils/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/analysis_options.py",
+      "sha256": "a831d5658c16b6f1ffdb2536d9562679d0acfcb45d97568e493ff37a97386d3f",
+      "source": "qgis/fastnsa_qgis/utils/analysis_options.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/bootstrap.py",
+      "sha256": "61cdf72fba6b40e2c419a0b1b02e982895f9e4a382d4a1f179df8be0bd571e1e",
+      "source": "qgis/fastnsa_qgis/utils/bootstrap.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/density_style.py",
+      "sha256": "361cf482d49618d11b16666583643f03d1d4335db9d47dfea1cfe03bba97f83e",
+      "source": "qgis/fastnsa_qgis/utils/density_style.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/layer_utils.py",
+      "sha256": "25f9dec26b6db156d17f44fa66a14558abf1934e0cb8cfb937215af8e68321c8",
+      "source": "qgis/fastnsa_qgis/utils/layer_utils.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/processing_help.py",
+      "sha256": "7691b73c9b2e9d9b8ed0cda8e66a742bd4b28df037d0e42136ec3dc86672b7a5",
+      "source": "qgis/fastnsa_qgis/utils/processing_help.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/processing_outputs.py",
+      "sha256": "a65be55415d6babd74992134e492b20659ff1c1665cdbae11ea0e3147af9b604",
+      "source": "qgis/fastnsa_qgis/utils/processing_outputs.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/progress.py",
+      "sha256": "2519295f88533e8d5b1279edc9a768762dee1a3466478bdef88ba82ee7e557e4",
+      "source": "qgis/fastnsa_qgis/utils/progress.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/fastnsa_qgis/utils/validation.py",
+      "sha256": "83bfadb4343ec12ae3a9f656056656832bc9f47d73efca47f615d2691f21683c",
+      "source": "qgis/fastnsa_qgis/utils/validation.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/package_plugin.py",
+      "sha256": "ce7b6c1172f5511332c592ca02d606719e0c8b2dec34fa55b3a915eef86a328f",
+      "source": "qgis/package_plugin.py"
+    },
+    {
+      "mode": "100644",
+      "path": "qgis/validate_package.py",
+      "sha256": "1bf9a69ba9c07d42888cad67d219b92db883575d2c1bb1d9f1aa6292f026003d",
+      "source": "qgis/validate_package.py"
+    },
+    {
+      "mode": "100644",
+      "path": "runtime-lock.json",
+      "sha256": "8028c796c21a90d05c6263c4adcf4ec54c12808e25755bfdbab725af52507a59",
+      "source": "generated:runtime-lock"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/__init__.py",
+      "sha256": "b198ea502ffa329d3d74ee1b16422db97531339ced8e2000df8d9093ae8e46d2",
+      "source": "tests/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/packaging/__init__.py",
+      "sha256": "ab0cdc8fda2ef016b0de21aa5a4c1ea0bc013dea838a8341f5b2ce70fdeeada6",
+      "source": "tests/packaging/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/packaging/test_plugin_archive.py",
+      "sha256": "a9d78b2db48d7ef85bc48159712023891bfa5d4982158038382d7525066d8308",
+      "source": "tests/packaging/test_plugin_archive.py"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/qgis/__init__.py",
+      "sha256": "49f536505a3afbd0431dcbdc3d54e8038e3019a91034da2be7585587c762eccb",
+      "source": "tests/qgis/__init__.py"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/qgis/test_application.py",
+      "sha256": "3e9d22444c4e094fbfef5d264a9362ee76439ba34583f71a5e298c99947e4449",
+      "source": "tests/qgis/test_application.py"
+    },
+    {
+      "mode": "100644",
+      "path": "tests/qgis/test_plugin.py",
+      "sha256": "1c876b31eefca609d45a2183c7bfa53aedd92ae981c39e27ae104b74573148f4",
+      "source": "tests/qgis/test_plugin.py"
+    }
+  ],
+  "policy_sha256": "d391f87d84f8cfd5f814b7f8dedbdabfda837eb426d168f123f916ebef251537",
+  "release_approved": false,
+  "repository": "qgis",
+  "schema_version": 1,
+  "source_commit": "ad4501d07b494e7dfbbc7fc4a4fde60c54d4a778",
+  "warnings": []
+}

@@ -1,0 +1,65 @@
+name: QGIS plugin tests and candidates
+
+on:
+  pull_request:
+  push:
+    branches: [main, master, "release/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packaging-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests/packaging -t . -v
+
+  qgis-candidate:
+    name: QGIS candidate / ${{ matrix.name }}
+    if: ${{ vars.FASTNSA_RUNTIME_PUBLISHED == 'true' }}
+    needs: packaging-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x86_64
+            os: ubuntu-22.04
+            artifact: fastnsa-qgis-rc5-linux-x86_64
+          - name: Windows AMD64
+            os: windows-latest
+            artifact: fastnsa-qgis-rc5-windows-amd64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Read pinned runtime
+        shell: bash
+        run: |
+          python -c 'import json; s=json.load(open("runtime-lock.json")); print("FASTNSA_REQUIREMENT=" + s["package"] + "==" + s["version"])' >> "$GITHUB_ENV"
+      - name: Download published runtime wheel
+        run: >-
+          python -m pip download --only-binary=:all: --no-deps --dest wheelhouse "${{ env.FASTNSA_REQUIREMENT }}"
+      - name: Install runtime validation dependency
+        run: python -m pip install --only-binary=numpy "numpy==1.26.4"
+      - name: Build plugin from the pinned wheel
+        shell: bash
+        run: python qgis/package_plugin.py --wheel wheelhouse/*.whl --output-dir dist
+      - name: Validate isolated plugin runtime
+        shell: bash
+        run: python qgis/validate_package.py dist/*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/*.zip
+            dist/*.sha256
+            dist/*.json
+          if-no-files-found: error
