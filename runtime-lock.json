@@ -1,5 +1,5 @@
 {
   "note": "Publish this runtime before plugin builds; archive selected wheel SHA-256 values before release.",
   "package": "fastnsa",
-  "version": "0.2.0"
+  "version": "0.3.0"
 }
