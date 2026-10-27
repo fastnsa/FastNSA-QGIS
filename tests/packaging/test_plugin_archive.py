@@ -24,6 +24,11 @@ def load_tool(name, filename):
     return module
 
 
+def plugin_workflow(name):
+    template = ROOT / "tools/public_export/templates" / f"qgis-{name}"
+    return template if template.is_file() else ROOT / ".github/workflows" / name
+
+
 builder = load_tool("candidate_builder", "package_plugin.py")
 validator = load_tool("candidate_validator", "validate_package.py")
 
@@ -82,7 +87,7 @@ class PluginArchiveTest(unittest.TestCase):
         version = metadata["general"]["version"]
         self.assertRegex(version, r"^\d+\.\d+\.\d+$")
         self.assertFalse(metadata["general"].getboolean("experimental"))
-        workflow = (ROOT / ".github/workflows/multiplatform.yml").read_text(encoding="utf-8")
+        workflow = plugin_workflow("multiplatform.yml").read_text(encoding="utf-8")
         for target in ("linux-x86_64", "windows-amd64"):
             self.assertIn(f"artifact: fastnsa-qgis-{target}", workflow)
         self.assertNotIn("FASTNSA_RUNTIME_PUBLISHED", workflow)

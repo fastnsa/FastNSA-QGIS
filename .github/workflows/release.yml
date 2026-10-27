@@ -94,6 +94,5 @@ jobs:
           RELEASE_VERSION: ${{ needs.preflight.outputs.version }}
         run: >-
           gh release create "$RELEASE_TAG" release/*.zip release/*.sha256
-          release/*.json release/SHA256SUMS release/RELEASE_NOTES.md
           --verify-tag --draft --title "FastNSA for QGIS $RELEASE_VERSION"
           --notes-file release/RELEASE_NOTES.md

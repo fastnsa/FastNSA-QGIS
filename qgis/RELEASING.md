@@ -80,11 +80,22 @@ The tag must match metadata exactly and its commit must be reachable from
 rebuilds both archives and verifies versions, source commit, runtime hashes,
 ABI, checksums, embedded build information, and runtime reports before drafting.
 
-The draft contains:
+The public draft contains only four download assets:
 
 - Linux and Windows installable plugin ZIPs;
-- per-archive SHA-256, build information, and runtime validation reports;
-- `manifest.json` and `SHA256SUMS` covering both platforms and release notes.
+- the matching per-archive `.zip.sha256` files.
+
+Release notes are used as the page body, not uploaded as another attachment.
+The complete verified bundle, including build information, runtime reports,
+`manifest.json`, `SHA256SUMS`, and release notes, remains in the Actions artifact
+`fastnsa-qgis-release-<version>` for 90 days. Archive that artifact separately
+before expiration if long-term maintenance evidence is needed. Do not upload
+its aggregate checksum inventory by itself alongside the four public assets:
+it also references the maintenance files that are not public attachments.
+
+Local `release_plugin.py verify` requires this full CI bundle, not just the
+four public downloads. End users can check each installer with its individual
+`.zip.sha256` file. The plugin archive itself also retains `build-info.json`.
 
 After final ZIP smoke tests, review the draft notes and assets, then select
 **Publish release**. A draft release is not public; neither are releases in a

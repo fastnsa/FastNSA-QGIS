@@ -133,16 +133,24 @@ class ReleaseTest(unittest.TestCase):
                 release.verify_release(root / "release", self.commit, self.ref)
 
     def test_workflow_drafts_only_on_tag_push(self):
-        workflow = (release.REPO_ROOT / ".github/workflows/release.yml").read_text()
+        workflow = archive_tests.plugin_workflow("release.yml").read_text()
         self.assertIn("workflow_dispatch:", workflow)
         self.assertIn("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')", workflow)
         self.assertIn("--verify-tag --draft", workflow)
         self.assertIn("--notes-file release/RELEASE_NOTES.md", workflow)
-        self.assertIn("release/SHA256SUMS release/RELEASE_NOTES.md", workflow)
         self.assertIn("contents: write", workflow)
         self.assertIn("git merge-base --is-ancestor", workflow)
         self.assertNotIn("secrets: inherit", workflow)
         self.assertNotIn("environment:", workflow)
+
+    def test_workflow_keeps_full_archive_but_publishes_only_installers_and_hashes(self):
+        workflow = archive_tests.plugin_workflow("release.yml").read_text()
+        upload = workflow.split('gh release create "$RELEASE_TAG"', 1)[1].split("--verify-tag", 1)[0]
+        self.assertEqual(upload.split(), ["release/*.zip", "release/*.sha256"])
+        self.assertIn("path: release/*", workflow)
+        self.assertIn("retention-days: 90", workflow)
+        self.assertIn("release_plugin.py verify --bundle-dir release", workflow)
+        self.assertLess(workflow.index("Recheck release bundle"), workflow.index("gh release create"))
 
 
 if __name__ == "__main__":

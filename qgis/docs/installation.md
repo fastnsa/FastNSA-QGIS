@@ -24,8 +24,9 @@ supported. The Windows acceptance baseline is QGIS 3.34 with Python 3.12.7,
 NumPy 1.26.4, and Qt 5.15.13.
 
 Install the plugin ZIP, not GitHub's automatically generated **Source code** ZIP
-or the outer ZIP downloaded from an Actions artifact. Checksums and build reports
-are provided alongside release assets. Maintainer validation steps are in the
+or the outer ZIP downloaded from an Actions artifact. Each installer has a
+matching `.zip.sha256` checksum file. Full build and validation reports are kept
+in the Actions artifact. Maintainer validation steps are in the
 [release guide](https://github.com/fastnsa/FastNSA-QGIS/blob/main/qgis/RELEASING.md).
 
 ## Install from ZIP
