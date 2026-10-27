@@ -1,7 +1,7 @@
 # FastNSA for QGIS
 
 FastNSA brings high-performance network spatial analysis to the QGIS desktop
-and Processing Toolbox. The `0.1.0-rc5` candidate provides four workflows:
+and Processing Toolbox. Version `0.1.0` provides four workflows:
 
 - nearest-edge preprocessing with reusable `edge_id`, `offset`, `distance`,
   and `network_sig` fields;
@@ -10,37 +10,26 @@ and Processing Toolbox. The `0.1.0-rc5` candidate provides four workflows:
 - spatiotemporal network K-function analysis with RQS, SPS, EAR, MTS, or
   EARTH.
 
-Spatiotemporal NKDE, OSM downloading, and pause/resume are not part of the
-`0.1.0` release scope.
-
 ## Requirements
 
-- Candidate targets: Linux x86_64 and Windows AMD64
-- QGIS 3.34 or newer, using Qt5
+- Supported platforms: Linux x86_64 and Windows AMD64
+- QGIS 3.34 through QGIS 3.x, using Qt5
 - Python 3.11 or newer in the QGIS environment
 - NumPy in the QGIS Python environment
 - a C++ runtime compatible with the bundled native library
 
-The Windows acceptance target is QGIS 3.34 / Python 3.12.7 / NumPy 1.26.4 /
-Qt 5.15.13. Windows RC4 smoke testing has been reported without platform
-compatibility failures. Recent fixes still need acceptance using a newly built
-candidate. QGIS 4.x and Qt6 are not yet supported.
+QGIS 4.x and Qt6 are not yet supported. macOS plugin packages are not provided.
 
-The release ZIP bundles the lightweight FastNSA Python runtime and
+The release ZIP bundles the lightweight FastNSA 0.3.0 Python runtime and
 `libfastnsa.so` on Linux or `fastnsa.dll` on Windows. GeoPandas, Shapely,
 NetworkX, and OSMnx are not required.
 Matplotlib is optional and is used only for interactive spatiotemporal 3D
 surfaces; the result table and 2D views remain available without it.
 
-Candidate ZIPs are built by CI from tested Linux/Windows wheels. Linux runtimes
-are built using manylinux2014; inspect each archive's build information and
-validation report for its provenance. Historical RC2 system-runtime requirements
-do not describe the current wheel-based candidates. Manual QGIS acceptance is
-required for each new candidate. macOS plugin packages are not yet provided.
-
 ## Installation
 
-1. Download the ZIP for your operating system and architecture.
+1. Download the ZIP for your operating system and architecture from
+   [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases).
 2. In QGIS, open **Plugins > Manage and Install Plugins > Install from ZIP**.
 3. Select the archive and enable **FastNSA**.
 4. Open the FastNSA window from its toolbar button or plugin menu. The same
@@ -141,16 +130,10 @@ next safe checkpoint before stopping. Canceled runs do not finalize outputs.
 - **QGIS closes after a native crash:** report the input description, method,
   parameters, platform, QGIS version, and plugin log through the issue tracker.
 
-## Distribution Status
+## Distribution
 
-Candidate archives are prepared for project-controlled distribution. Linux,
-Windows, and macOS native/wheel CI has passed; this does not replace QGIS plugin
-acceptance, and macOS plugin archives remain deferred. The
-[official QGIS plugin repository requirements](https://plugins.qgis.org/docs/publish/)
-prohibit bundled binaries. The current self-contained ZIP is for
-project-controlled distribution, not official-repository submission. An
-official-repository variant would require external FastNSA installation,
-dependency discovery, and separate packaging; that variant is not implemented.
+Install the platform-specific ZIP from GitHub Releases. The self-contained
+package is not distributed through the official QGIS plugin repository.
 
 ## Algorithm References
 

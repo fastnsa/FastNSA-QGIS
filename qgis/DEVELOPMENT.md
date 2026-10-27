@@ -8,9 +8,10 @@ Packaging tests use only Python's standard library.
 
 ## Build a Plugin ZIP
 
-Choose a tested FastNSA wheel matching the version in `runtime-lock.json`
-and the packaging host's operating system and CPU architecture. Wheels can be
-obtained from the FastNSA build artifacts or a published package release.
+Choose the exact published FastNSA wheel listed for the packaging host in
+`runtime-lock.json`. Packaging verifies its filename, SHA-256, and metadata
+version before extracting any runtime files. Locally rebuilt or modified wheels
+are intentionally rejected unless the lock is explicitly updated for testing.
 
 ```bash
 python qgis/package_plugin.py --wheel /path/to/fastnsa-platform.whl --output-dir dist
@@ -51,15 +52,13 @@ python -m unittest discover -s tests/qgis -t . -v
 Do not use those source-testing overrides for clean-profile ZIP acceptance.
 Install only the built ZIP in a new QGIS profile for GUI validation.
 
-## Candidate Automation
+## Build and Release Automation
 
-The GitHub Actions workflow runs packaging tests on pushes and pull requests.
-Candidate builds are enabled only when the repository Actions variable
-`FASTNSA_RUNTIME_PUBLISHED` is set to `true`. Before enabling it, verify the
-package ownership and availability of the pinned FastNSA version on PyPI.
-If wheels are hosted elsewhere, configure and verify that download source
-before enabling candidate builds.
+The GitHub Actions workflow runs packaging tests and Linux/Windows package
+builds on pushes and pull requests. It downloads FastNSA from PyPI using
+`--require-hashes`; the packager independently rechecks the selected wheel.
+There is no `FASTNSA_RUNTIME_PUBLISHED` variable or external secret to configure.
 
-Candidate builds run on Linux and Windows. Isolated runtime validation does
-not replace manual QGIS acceptance. See [Dependencies](DEPENDENCIES.md) for
-runtime requirements and distribution restrictions.
+The release workflow reuses these checks. A manual run only assembles a release
+bundle; a matching version-tag push also creates a draft GitHub Release. See
+[Releasing](RELEASING.md) for repository setup, validation, and publication steps.

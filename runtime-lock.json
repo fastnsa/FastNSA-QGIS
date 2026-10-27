@@ -1,5 +1,16 @@
 {
-  "note": "Publish this runtime before plugin builds; archive selected wheel SHA-256 values before release.",
+  "schema_version": 1,
   "package": "fastnsa",
-  "version": "0.3.0"
+  "version": "0.3.0",
+  "native_abi": 2,
+  "wheels": {
+    "linux-x86_64": {
+      "filename": "fastnsa-0.3.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "sha256": "1f4f9ccefe59d8903ad2b9f7485da3d297c35f297b5ad4a63246585b695c542c"
+    },
+    "windows-amd64": {
+      "filename": "fastnsa-0.3.0-py3-none-win_amd64.whl",
+      "sha256": "1242a9c5d6ac7d6092ea5da6d908357ea4481b6593a9cd83e34e73c44ebd9802"
+    }
+  }
 }

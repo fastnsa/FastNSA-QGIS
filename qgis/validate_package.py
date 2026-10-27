@@ -110,6 +110,8 @@ def validate_archive(archive_path: Path) -> dict:
             **build_info, "archive": archive_path.name, "archive_sha256": checksum,
             **json.loads(result.stdout.strip().splitlines()[-1]),
         }
+        if build_info.get("runtime_lock_verified") and report["native_abi"] != build_info["runtime_abi"]:
+            raise ValueError("Bundled native ABI does not match the runtime lock.")
     archive_path.with_suffix(".validation.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )

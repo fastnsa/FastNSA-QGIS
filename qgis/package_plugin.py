@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import tempfile
@@ -22,6 +23,7 @@ PLUGIN_SOURCE = REPO_ROOT / "qgis" / "fastnsa_qgis"
 PYTHON_SOURCE = REPO_ROOT / "python" / "fastnsa"
 QGIS_DOCS_SOURCE = REPO_ROOT / "qgis" / "docs"
 LICENSE_SOURCE = REPO_ROOT / "LICENSE"
+RUNTIME_LOCK = REPO_ROOT / "runtime-lock.json"
 if not LICENSE_SOURCE.is_file():
     LICENSE_SOURCE = REPO_ROOT / "python" / "LICENSE"
 
@@ -46,6 +48,34 @@ RELEASE_DOCS = (
     (REPO_ROOT / "qgis" / "DEPENDENCIES.md", Path("DEPENDENCIES.md")),
     (LICENSE_SOURCE, Path("LICENSE")),
 )
+
+
+def read_runtime_lock() -> dict:
+    lock = json.loads(RUNTIME_LOCK.read_text(encoding="utf-8"))
+    if (lock.get("schema_version") != 1 or lock.get("package") != "fastnsa"
+            or not re.fullmatch(r"\d+\.\d+\.\d+", lock.get("version", ""))
+            or type(lock.get("native_abi")) is not int or lock["native_abi"] < 1):
+        raise ValueError("Invalid FastNSA runtime lock metadata.")
+    wheels = lock.get("wheels", {})
+    if set(wheels) != {"linux-x86_64", "windows-amd64"}:
+        raise ValueError("Runtime lock must cover Linux x86_64 and Windows AMD64.")
+    suffixes = {
+        "linux-x86_64": "manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+        "windows-amd64": "win_amd64.whl",
+    }
+    for target, record in wheels.items():
+        expected = f"fastnsa-{lock['version']}-py3-none-{suffixes[target]}"
+        if (record.get("filename") != expected
+                or not re.fullmatch(r"[0-9a-f]{64}", record.get("sha256", ""))):
+            raise ValueError(f"Invalid locked wheel for {target}.")
+    return lock
+
+
+def target_platform() -> str:
+    machine = platform.machine().lower()
+    if machine not in {"x86_64", "amd64"} or platform.system() not in {"Linux", "Windows"}:
+        raise ValueError(f"Unsupported plugin target: {platform.system()}/{machine}")
+    return "linux-x86_64" if platform.system() == "Linux" else "windows-amd64"
 
 
 def _native_library_name() -> str:
@@ -86,6 +116,13 @@ def _copy_runtime(destination: Path, native_library: Path):
 
 
 def _copy_wheel_runtime(destination: Path, wheel_path: Path) -> dict:
+    lock = read_runtime_lock()
+    record = lock["wheels"][target_platform()]
+    if wheel_path.name != record["filename"]:
+        raise ValueError(f"Wheel does not match the locked filename: {record['filename']}")
+    wheel_sha256 = hashlib.sha256(wheel_path.read_bytes()).hexdigest()
+    if wheel_sha256 != record["sha256"]:
+        raise ValueError("Wheel SHA-256 does not match the runtime lock.")
     platform_tags = wheel_path.stem.rsplit("-", 1)[-1].split(".")
     system = platform.system()
     machine = platform.machine().lower()
@@ -115,6 +152,8 @@ def _copy_wheel_runtime(destination: Path, wheel_path: Path) -> dict:
         metadata = Parser().parsestr(wheel.read(metadata_names[0]).decode("utf-8"))
         if metadata.get("Name", "").lower() != "fastnsa":
             raise ValueError("The wheel must contain the fastnsa package.")
+        if metadata.get("Version") != lock["version"]:
+            raise ValueError("Wheel version does not match the runtime lock.")
 
         for name in sorted(names):
             if name.endswith("/"):
@@ -139,8 +178,10 @@ def _copy_wheel_runtime(destination: Path, wheel_path: Path) -> dict:
 
     return {
         "wheel": wheel_path.name,
-        "wheel_sha256": hashlib.sha256(wheel_path.read_bytes()).hexdigest(),
+        "wheel_sha256": wheel_sha256,
         "runtime_version": metadata.get("Version"),
+        "runtime_abi": lock["native_abi"],
+        "runtime_lock_verified": True,
     }
 
 
@@ -182,6 +223,7 @@ def build_archive(
             _copy_runtime(package_root / "fastnsa", native_library)
             runtime_info = {
                 "native_library_sha256": hashlib.sha256(native_library.read_bytes()).hexdigest(),
+                "runtime_lock_verified": False,
             }
         _copy_release_docs(package_root)
 

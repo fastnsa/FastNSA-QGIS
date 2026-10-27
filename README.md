@@ -22,16 +22,17 @@ execution, progress reporting, and cooperative cancellation.
 - Python 3.11 or newer and NumPy in the QGIS environment.
 - A plugin package matching the operating system and CPU architecture.
 
-Current candidate packages target Linux x86_64 and Windows AMD64. macOS plugin
+Version **0.1.0** targets Linux x86_64 and Windows AMD64. macOS plugin
 packages and QGIS 4/Qt6 are not yet supported. Matplotlib is optional and enables
 interactive 3D surfaces.
 
-The installable ZIP includes the lightweight FastNSA runtime. GeoPandas,
+The installable ZIP includes the lightweight FastNSA 0.3.0 runtime. GeoPandas,
 Shapely, NetworkX, and OSMnx are not required.
 
 ## Installation
 
-1. Obtain the FastNSA plugin ZIP matching your operating system and architecture.
+1. Download the FastNSA plugin ZIP matching your operating system and architecture
+   from [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases).
 2. In QGIS, open **Plugins > Manage and Install Plugins > Install from ZIP**.
 3. Select the ZIP, enable **FastNSA**, and open it from the toolbar or plugin menu.
 

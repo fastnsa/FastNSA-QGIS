@@ -2,7 +2,7 @@
 
 FastNSA provides native-accelerated network spatial analysis through both a
 workflow-oriented dialog and the QGIS Processing Toolbox. This guide documents
-the `0.1.0-rc5` candidate behavior.
+version `0.1.0`.
 
 ## Start Here
 
@@ -36,7 +36,7 @@ documentation.
 | Fast Spatiotemporal Network K-Function | Result table, surface viewer, optional CSV | EARTH, MTS, EAR, SPS, RQS |
 
 Spatiotemporal NKDE, OSM downloading, pause/resume, and saved viewer packages
-are not included in this release candidate.
+are not included in this release.
 
 ## Two Entry Points
 

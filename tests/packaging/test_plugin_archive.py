@@ -2,6 +2,7 @@
 
 import importlib.util
 import configparser
+import hashlib
 import json
 from pathlib import Path
 import platform
@@ -28,6 +29,19 @@ validator = load_tool("candidate_validator", "validate_package.py")
 
 
 class PluginArchiveTest(unittest.TestCase):
+    def setUp(self):
+        self.lock = json.loads(builder.RUNTIME_LOCK.read_text(encoding="utf-8"))
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.lock_path = Path(directory.name) / "runtime-lock.json"
+        self.write_lock()
+        patcher = patch.object(builder, "RUNTIME_LOCK", self.lock_path)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def write_lock(self):
+        self.lock_path.write_text(json.dumps(self.lock), encoding="utf-8")
+
     def test_icon_resources_are_valid_multiresolution_pngs(self):
         for size in (16, 24, 32, 48, 64, 96, 128, 256):
             filename = "icon.png" if size == 256 else f"icon_{size}.png"
@@ -62,19 +76,22 @@ class PluginArchiveTest(unittest.TestCase):
         self.assertTrue((builder.PLUGIN_SOURCE / general["icon"]).is_file())
         self.assertTrue(general["changelog"].strip())
 
-    def test_candidate_version_matches_ci_and_installation_docs(self):
+    def test_stable_version_matches_release_docs(self):
         metadata = configparser.ConfigParser()
         metadata.read(builder.PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
         version = metadata["general"]["version"]
-        if "-rc" not in version:
-            self.skipTest("RC artifact naming applies only to release candidates")
-        candidate = version.rsplit("-", 1)[1]
+        self.assertRegex(version, r"^\d+\.\d+\.\d+$")
+        self.assertFalse(metadata["general"].getboolean("experimental"))
         workflow = (ROOT / ".github/workflows/multiplatform.yml").read_text(encoding="utf-8")
         for target in ("linux-x86_64", "windows-amd64"):
-            self.assertIn(f"artifact: fastnsa-qgis-{candidate}-{target}", workflow)
+            self.assertIn(f"artifact: fastnsa-qgis-{target}", workflow)
+        self.assertNotIn("FASTNSA_RUNTIME_PUBLISHED", workflow)
+        self.assertIn("--require-hashes", workflow)
+        self.assertIn("workflow_call:", workflow)
         for relative in ("README.md", "README_ZH.md", "docs/index.md", "docs/installation.md"):
             text = (ROOT / "qgis" / relative).read_text(encoding="utf-8")
             self.assertIn(version, text, msg=f"Outdated version in {relative}")
+        self.assertTrue((ROOT / "qgis/releases" / f"{version}.md").is_file())
 
     def test_repository_links_target_the_standalone_plugin_repository(self):
         metadata = configparser.ConfigParser()
@@ -88,16 +105,13 @@ class PluginArchiveTest(unittest.TestCase):
             self.assertIn(repository, text)
             self.assertNotIn("FastNSA" + "-dev", text)
 
-    def make_wheel(self, directory, *, platform_tag=None, omit=None):
-        machine = platform.machine().lower()
-        arch = {"amd64": "x86_64", "aarch64": "arm64"}.get(machine, machine)
-        if platform_tag is None:
-            platform_tag = {
-                "Linux": f"manylinux2014_{arch}",
-                "Windows": "win_amd64" if arch == "x86_64" else "win_arm64",
-                "Darwin": f"macosx_11_0_{arch}",
-            }[platform.system()]
-        wheel = directory / f"fastnsa-0.2.0-py3-none-{platform_tag}.whl"
+    def make_wheel(self, directory, *, platform_tag=None, omit=None, metadata_version=None):
+        target = builder.target_platform()
+        version = self.lock["version"]
+        filename = self.lock["wheels"][target]["filename"]
+        if platform_tag is not None:
+            filename = f"fastnsa-{version}-py3-none-{platform_tag}.whl"
+        wheel = directory / filename
         with zipfile.ZipFile(wheel, "w") as archive:
             for relative in builder.RUNTIME_FILES:
                 if relative == omit:
@@ -112,8 +126,12 @@ class PluginArchiveTest(unittest.TestCase):
             archive.writestr("fastnsa.libs/dependency.dll", b"dependency-test-data")
             archive.writestr("fastnsa.libs/.load-order-fastnsa", "dependency.dll\n")
             archive.writestr(
-                "fastnsa-0.2.0.dist-info/METADATA", "Name: fastnsa\nVersion: 0.2.0\n"
+                f"fastnsa-{version}.dist-info/METADATA",
+                f"Name: fastnsa\nVersion: {metadata_version or version}\n",
             )
+        # Tests lock their synthetic wheel; production builds use the checked-in lock.
+        self.lock["wheels"][target]["sha256"] = hashlib.sha256(wheel.read_bytes()).hexdigest()
+        self.write_lock()
         return wheel
 
     def test_candidate_uses_wheel_runtime_and_preserves_repaired_dependencies(self):
@@ -134,7 +152,10 @@ class PluginArchiveTest(unittest.TestCase):
                 self.assertIn("fastnsa_qgis/fastnsa.libs/.load-order-fastnsa", archive.namelist())
                 info = json.loads(archive.read("fastnsa_qgis/build-info.json"))
                 self.assertEqual(info["source_commit"], "test-commit")
-                self.assertEqual(info["runtime_version"], "0.2.0")
+                self.assertEqual(info["runtime_version"], self.lock["version"])
+                self.assertTrue(info["runtime_lock_verified"])
+                self.assertEqual(info["runtime_abi"], self.lock["native_abi"])
+                self.assertEqual(info["wheel_sha256"], self.lock["wheels"][builder.target_platform()]["sha256"])
                 self.assertEqual(info["wheel"], wheel.name)
                 source_metadata = configparser.ConfigParser()
                 source_metadata.read(builder.PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
@@ -154,6 +175,8 @@ class PluginArchiveTest(unittest.TestCase):
                     "DEPENDENCIES.md", "docs/workflows.md",
                 ):
                     self.assertIn(f"fastnsa_qgis/{relative}", archive.namelist())
+                self.assertNotIn("fastnsa_qgis/RELEASING.md", archive.namelist())
+                self.assertNotIn("fastnsa_qgis/DEVELOPMENT.md", archive.namelist())
             self.assertTrue(candidate.with_suffix(".zip.sha256").is_file())
             self.assertEqual(
                 json.loads(candidate.with_suffix(".build-info.json").read_text()), info
@@ -165,6 +188,34 @@ class PluginArchiveTest(unittest.TestCase):
             wheel = self.make_wheel(directory, platform_tag="unsupported_arch")
             with self.assertRaisesRegex(ValueError, "does not match"):
                 builder.build_archive(directory / "dist", wheel=wheel)
+
+    def test_modified_wheel_is_rejected_before_extraction(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            wheel = self.make_wheel(directory)
+            with wheel.open("ab") as output:
+                output.write(b"tampered")
+            with self.assertRaisesRegex(ValueError, "SHA-256"):
+                builder.build_archive(directory / "dist", wheel=wheel)
+
+    def test_mismatched_metadata_version_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            wheel = self.make_wheel(directory, metadata_version="0.2.0")
+            with self.assertRaisesRegex(ValueError, "version does not match"):
+                builder.build_archive(directory / "dist", wheel=wheel)
+
+    def test_invalid_lock_is_rejected(self):
+        for key, value in (("version", "0.3.0\nmalicious"), ("native_abi", True),
+                           ("wheels", {}), ("package", "other")):
+            with self.subTest(key=key):
+                original = self.lock[key]
+                self.lock[key] = value
+                self.write_lock()
+                with self.assertRaises(ValueError):
+                    builder.read_runtime_lock()
+                self.lock[key] = original
+        self.write_lock()
 
     def test_wheel_packaging_does_not_require_python_source_checkout(self):
         with tempfile.TemporaryDirectory() as temporary:

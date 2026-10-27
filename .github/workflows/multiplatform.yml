@@ -1,10 +1,11 @@
-name: QGIS plugin tests and candidates
+name: QGIS plugin checks and packages
 
 on:
   pull_request:
   push:
     branches: [main, master, "release/**"]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -14,14 +15,15 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: python -m unittest discover -s tests/packaging -t . -v
 
-  qgis-candidate:
-    name: QGIS candidate / ${{ matrix.name }}
-    if: ${{ vars.FASTNSA_RUNTIME_PUBLISHED == 'true' }}
+  qgis-package:
+    name: QGIS package / ${{ matrix.name }}
     needs: packaging-tests
     strategy:
       fail-fast: false
@@ -29,24 +31,28 @@ jobs:
         include:
           - name: Linux x86_64
             os: ubuntu-22.04
-            artifact: fastnsa-qgis-rc5-linux-x86_64
+            artifact: fastnsa-qgis-linux-x86_64
           - name: Windows AMD64
             os: windows-latest
-            artifact: fastnsa-qgis-rc5-windows-amd64
+            artifact: fastnsa-qgis-windows-amd64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Read pinned runtime
+      - name: Generate hash-locked runtime requirement
         shell: bash
         run: |
-          python -c 'import json; s=json.load(open("runtime-lock.json")); print("FASTNSA_REQUIREMENT=" + s["package"] + "==" + s["version"])' >> "$GITHUB_ENV"
+          python qgis/release_plugin.py requirement --output runtime-requirement.txt
       - name: Download published runtime wheel
         run: >-
-          python -m pip download --only-binary=:all: --no-deps --dest wheelhouse "${{ env.FASTNSA_REQUIREMENT }}"
+          python -m pip --isolated download --index-url https://pypi.org/simple
+          --only-binary=:all: --no-deps --require-hashes --dest wheelhouse
+          --requirement runtime-requirement.txt
       - name: Install runtime validation dependency
         run: python -m pip install --only-binary=numpy "numpy==1.26.4"
       - name: Build plugin from the pinned wheel
@@ -63,3 +69,4 @@ jobs:
             dist/*.sha256
             dist/*.json
           if-no-files-found: error
+          retention-days: 30

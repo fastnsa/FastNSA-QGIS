@@ -1,7 +1,7 @@
 # FastNSA QGIS 插件
 
 FastNSA 为 QGIS 桌面端和 Processing Toolbox 提供高性能网络空间分析。
-`0.1.0-rc5` 候选版包含四条工作流：
+`0.1.0` 版本包含四条工作流：
 
 - 最近边预处理，输出可复用的 `edge_id`、`offset`、`distance` 和
   `network_sig`；
@@ -9,33 +9,25 @@ FastNSA 为 QGIS 桌面端和 Processing Toolbox 提供高性能网络空间分�
 - 使用 NS（精确）或 STARS（近似）的网络 K 函数；
 - 使用 RQS、SPS、EAR、MTS 或 EARTH 的时空网络 K 函数。
 
-时空 NKDE、OSM 下载和暂停后继续不属于 `0.1.0` 的发布范围。
-
 ## 运行要求
 
-- 候选平台：Linux x86_64 和 Windows AMD64
-- QGIS 3.34 或更高版本，使用 Qt5
+- 支持平台：Linux x86_64 和 Windows AMD64
+- QGIS 3.34 至 QGIS 3.x，使用 Qt5
 - QGIS 环境中的 Python 3.11 或更高版本
 - QGIS Python 环境中可导入 NumPy
 - 与内置原生库兼容的 C++ 系统运行库
 
-发布 ZIP 内含轻量 FastNSA Python runtime，以及 Linux 的 `libfastnsa.so`
+发布 ZIP 内含轻量 FastNSA 0.3.0 Python runtime，以及 Linux 的 `libfastnsa.so`
 或 Windows 的 `fastnsa.dll`，不要求
 GeoPandas、Shapely、NetworkX 或 OSMnx。Matplotlib 是可选依赖，仅用于
 交互式时空 3D 曲面；缺少它不会影响结果表和二维视图。
 
-候选包由 CI 从已测试的 Linux/Windows wheel 生成。Linux runtime 使用
-manylinux2014 构建，旧 RC2 的 GLIBC/GLIBCXX 要求不适用于当前候选包。
-请以对应产物的构建信息和验证报告为准。macOS 插件安装包暂不提供。
-
-Windows 验收目标为 QGIS 3.34、Python 3.12.7、NumPy 1.26.4、Qt 5.15.13。
-RC4 在该环境的人工测试未发现平台兼容性问题，但本轮源码修复仍需用新包
-复测，不能直接沿用旧包的验收结论。CI 覆盖 Python 3.11/3.12 和
-NumPy 1.26.4；QGIS 4.x 与 Qt6 暂未纳入发布支持范围。
+macOS 插件安装包暂不提供；QGIS 4.x 与 Qt6 暂未纳入支持范围。
 
 ## 安装
 
-1. 下载与操作系统和架构匹配的插件 ZIP。
+1. 从 [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases)
+   下载与操作系统和架构匹配的插件 ZIP。
 2. 在 QGIS 中打开 **插件 > 管理并安装插件 > 从 ZIP 安装**。
 3. 选择 ZIP 并启用 **FastNSA**。
 4. 从工具栏或插件菜单打开主界面；四个算法也会出现在
@@ -112,13 +104,10 @@ epsilon 仅用于 STARS 采样，在 NS 下禁用；它不是保证误差百分�
 - **原生崩溃导致 QGIS 退出：** 提交 issue 时附上输入说明、方法、参数、平台、
   QGIS 版本和插件日志。
 
-## 发布状态
+## 分发方式
 
-候选包拟通过项目自有 release archive 分发。Linux、Windows 和 macOS 原生库及
-wheel CI 基线已通过，但不替代 QGIS 插件人工验收；macOS 插件包仍延期。
-[QGIS 官方插件仓库要求](https://plugins.qgis.org/docs/publish/)明确禁止插件包包含
-二进制文件。当前自包含 ZIP 仅用于项目自有渠道分发，不能直接提交官方仓库。
-官方仓库版本还需要实现外部 FastNSA 安装、依赖查找和独立打包，目前尚未提供。
+请从 GitHub Releases 安装与平台匹配的自包含 ZIP。目前不通过 QGIS 官方插件
+仓库分发。
 
 ## 算法论文
 
