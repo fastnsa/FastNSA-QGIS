@@ -1,129 +1,36 @@
-# FastNSA QGIS 插件
+# FastNSA QGIS 安装与文档
 
-FastNSA 为 QGIS 桌面端和 Processing Toolbox 提供高性能网络空间分析。
-`0.1.0` 版本包含四条工作流：
+项目介绍、截图和下载入口请访问
+[FastNSA-QGIS 项目主页](https://github.com/fastnsa/FastNSA-QGIS)。
 
-- 最近边预处理，输出可复用的 `edge_id`、`offset`、`distance` 和
-  `network_sig`；
-- 使用 ADA 或 LION 的网络核密度可视化（NKDV）；
-- 使用 NS（精确）或 STARS（近似）的网络 K 函数；
-- 使用 RQS、SPS、EAR、MTS 或 EARTH 的时空网络 K 函数。
-
-## 运行要求
-
-- 支持平台：Linux x86_64 和 Windows AMD64
-- QGIS 3.34 至 QGIS 3.x，使用 Qt5
-- QGIS 环境中的 Python 3.11 或更高版本
-- QGIS Python 环境中可导入 NumPy
-- 与内置原生库兼容的 C++ 系统运行库
-
-发布 ZIP 内含轻量 FastNSA 0.3.0 Python runtime，以及 Linux 的 `libfastnsa.so`
-或 Windows 的 `fastnsa.dll`，不要求
-GeoPandas、Shapely、NetworkX 或 OSMnx。Matplotlib 是可选依赖，仅用于
-交互式时空 3D 曲面；缺少它不会影响结果表和二维视图。
-
-macOS 插件安装包暂不提供；QGIS 4.x 与 Qt6 暂未纳入支持范围。
+本页是插件 `0.1.1` 的中文安装与文档导航，也随插件 ZIP 提供。
+0.1.1 正在准备发布。
 
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases)
-   下载与操作系统和架构匹配的插件 ZIP。
-2. 在 QGIS 中打开 **插件 > 管理并安装插件 > 从 ZIP 安装**。
-3. 选择 ZIP 并启用 **FastNSA**。
-4. 从工具栏或插件菜单打开主界面；四个算法也会出现在
-   **Processing 工具箱 > FastNSA** 中。
+请按[安装说明](docs/installation.md)选择安装包，完成安装或升级：
 
-如果 Processing Provider 没有立即出现，请重启 QGIS。启动诊断会报告
-NumPy、原生库或 ABI 依赖问题。开发环境和打包说明见
-[DEPENDENCIES.md](DEPENDENCIES.md)。
+- **Windows / Linux 自包含 ZIP：** 已包含 FastNSA，无需另装 FastNSA。
+- **源码 ZIP：** 请按[FastNSA 安装指南](docs/external-runtime.md)单独安装
+  `fastnsa==0.3.0`，再通过 **FastNSA > Runtime setup** 检查安装状态。
 
-完整文档以英文版 [FastNSA QGIS User Guide](docs/index.md) 为主，中文版
-README 和[时间字段指南](docs/TIME_GUIDE_ZH.md)作为补充。
+升级插件后，请保存项目并重启 QGIS。
+支持的平台和依赖要求见[软件要求](DEPENDENCIES.md)。
 
-## 数据要求
+## 用户文档
 
-- 道路输入必须是投影 CRS 下的线图层，地图单位应适合距离分析。
-- 事件输入必须是具有有效 CRS 的点图层；必要时会转换到道路 CRS。
-- 时空 K 函数还需要非空且至少包含两个不同值的时间字段。
+详细手册以英文为主：
 
-不要直接用经纬度道路图层进行距离分析，应先将道路重投影。
-
-## 推荐流程
-
-1. 如果同一批事件需要多次分析，先运行 **Fast Nearest Edge Matching**。
-2. 将 Matched Points 作为 NKDV、Network K 或 ST Network K 的事件输入，
-   插件会复用有效的 `edge_id` 和 `offset`，避免重复匹配。
-3. 保持道路图层不变。插件会比较 `network_sig`，不兼容时拒绝复用。
-4. 探索阶段使用临时输出；需要跨项目保存时使用 GeoPackage 或 CSV。
-
-主界面还会缓存未修改道路对应的原生网络。Activity Log 会记录 cache
-hit、cache miss 和 cache invalidated。
-
-## 分析说明
-
-### Network KDE / NKDV
-
-发布界面只开放已验证的 ADA、LION 和 Epanechnikov 核。输出为带 density
-字段的 lixel 线段。默认 Turbo 样式支持 Quantile（等量）、Equal interval、
-可配置分级数以及零密度独立颜色。归一化会在样式分级之前完成。
-
-### Network K-function
-
-NS（精确）和 STARS（近似）输出距离阈值、观测 K、理论 K 和可选 Monte Carlo 包络。
-交互测试默认 5 次模拟；确认数据和阈值无误后再提高模拟次数。主界面可查看
-图表；主界面和 Processing 均可输出临时无几何结果表，并独立选择保存 CSV。
-epsilon 仅用于 STARS 采样，在 NS 下禁用；它不是保证误差百分比。
-
-### Spatiotemporal Network K-function
-
-时间字段支持自动识别、日期时间、普通数值、Unix 秒和 Unix 毫秒；分析单位
-支持秒、分钟、小时和天。详细规则与示例见
-[时间字段指南](docs/TIME_GUIDE_ZH.md)。
-
-结果窗口提供表格、摘要、二维曲面和包络视图。仅在 Matplotlib 可用时启用
-交互式 3D 曲面。
-
-## 进度与取消
-
-分析以非模态 `QgsTask` 运行，并按情况显示输入验证、道路转换、事件匹配、
-原生计算、Monte Carlo、输出写入和样式应用等阶段。
-
-点击 **Hide Windows & Run in Background** 可隐藏任务和插件窗口并继续操作
-地图；FastNSA 工具栏按钮或状态栏中的 **Show** 可以恢复任务详情。点击
-**Cancel** 会请求协作式取消，较长的原生步骤可能需要到达下一个安全检查点
-才会停止；取消后不会完成输出写入。
-
-## 常见问题
-
-- **插件无法加载：** 查看启动诊断中的 NumPy、原生库、GLIBC/GLIBCXX 或
-  C++ 运行库信息。
-- **无法使用 3D：** 在 QGIS Python 环境安装 Matplotlib；其他功能不受影响。
-- **Matched Points 被拒绝：** 道路网络在预处理后发生变化，请重新匹配。
-- **运行时间过长：** 先减小阈值网格并使用不超过 5 次模拟，再查看日志中的
-  adapter 和 cache 信息。
-- **原生崩溃导致 QGIS 退出：** 提交 issue 时附上输入说明、方法、参数、平台、
-  QGIS 版本和插件日志。
-
-## 分发方式
-
-请从 GitHub Releases 安装与平台匹配的自包含 ZIP。目前不通过 QGIS 官方插件
-仓库分发。
-
-## 算法论文
-
-- 最近边匹配：[Ye 等，KDD 2026](https://doi.org/10.1145/3770855.3817711)
-- ADA：[Chan 等，PVLDB 2021](https://doi.org/10.14778/3461535.3461540)
-- LION：[Chan 等，PVLDB 2024](https://doi.org/10.14778/3648160.3648168)
-- Network K-function：[Chan 等，PVLDB 2022](https://doi.org/10.14778/3551793.3551836)
-- STARS：[Ye 等，KDD 2026](https://doi.org/10.1145/3770855.3817709)
-- EARTH：[Chan 等，KDD 2026](https://doi.org/10.1145/3770855.3817706)
-
-科研报告中应引用所选方法对应的论文，并同时记录 FastNSA 版本、参数和随机
-种子。
+- [快速入门](docs/quickstart.md)：完成第一次分析。
+- [用户手册](docs/index.md)：浏览全部使用说明。
+- [分析方法与参数](docs/workflows.md)：选择分析方法和参数。
+- [中文时间字段指南](docs/TIME_GUIDE_ZH.md)：选择时间字段、解释方式和单位。
+- [结果解读](docs/outputs-and-interpretation.md)：理解地图、曲线、曲面与保存结果。
+- [常见问题](docs/troubleshooting.md)：排查安装、数据和运行问题。
 
 ## 支持
 
-- 源码：<https://github.com/fastnsa/FastNSA-QGIS>
-- 问题反馈：<https://github.com/fastnsa/FastNSA-QGIS/issues>
-- 英文用户手册：[docs/index.md](docs/index.md)
-- 英文说明：[README.md](README.md)
+请在 [GitHub Issues](https://github.com/fastnsa/FastNSA-QGIS/issues)
+提供 QGIS 和插件版本、分析参数及错误信息。
+
+软件采用 [LGPL-2.1-only](https://github.com/fastnsa/FastNSA-QGIS/blob/main/LICENSE) 许可证。

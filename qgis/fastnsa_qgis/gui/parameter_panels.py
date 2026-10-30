@@ -152,6 +152,7 @@ class FastNearestEdgePanel(_BaseParameterPanel):
             "Output point-to-edge lines": self.output_lines_checkbox.isChecked(),
         }
 
+
 class NetworkKdePanel(_BaseParameterPanel):
     task_name = "Network KDE"
 
@@ -295,6 +296,8 @@ class NetworkKFunctionPanel(_BaseParameterPanel):
             "Monte Carlo envelope": self.envelope_checkbox.isChecked(),
             "Number of simulations": self.simulation_spin.value(),
         }
+
+
 class SpatiotemporalNetworkKFunctionPanel(_BaseParameterPanel):
     task_name = "Spatiotemporal Network K-Function"
 

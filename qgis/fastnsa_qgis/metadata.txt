@@ -2,16 +2,16 @@
 name=FastNSA
 qgisMinimumVersion=3.34
 qgisMaximumVersion=3.99
-description=Nearest-edge preprocessing, network density and K-function analysis for QGIS.
-version=0.1.0
+description=Explore event patterns along road networks with density maps and K-function analysis.
+version=0.1.1
 author=FastNSA Contributors
 email=fastnsa-group@outlook.com
-about=Separate Linux x86_64 and Windows AMD64 packages for nearest-edge preprocessing, network kernel density visualization (ADA/LION), network K-function (NS exact/STARS approximate), and spatiotemporal network K-function. Targets QGIS 3.34 through 3.x with Qt5 and Python 3.11 or newer. Includes reusable point-to-network mappings, temporary result layers and tables, CSV export, non-modal background execution, and cooperative cancellation. Bundles FastNSA 0.3.0 and its platform-specific native library. Requires NumPy and a compatible system C++ runtime; Matplotlib is optional for interactive ST 3D surfaces. macOS plugin packages and QGIS 4/Qt6 are not yet supported. Install the package matching your operating system and architecture.
-changelog=0.1.0: First stable release with nearest-edge matching, ADA/LION density layers, NS/STARS network K-function and spatiotemporal K-function; reusable mappings, temporary and exported results, background execution and cancellation, interactive charts and optional Matplotlib 3D surfaces. Bundles checksum-verified FastNSA 0.3.0 for Linux x86_64 and Windows AMD64.
+about=Study where events concentrate along roads and how their spatial and temporal patterns vary. Match event locations to the network, create density maps with ADA or LION, and explore network K-function results with NS (exact), STARS (approximate), or spatiotemporal methods. Use the FastNSA window for interactive maps and charts, or the Processing Toolbox for repeatable workflows. Supports Linux x86_64 and Windows AMD64 with QGIS 3.34 through 3.x, Qt5, and Python 3.11 or newer. Requires NumPy >= 1.23.5 and a compatible system C++ runtime. The source-only plugin needs the external Python package fastnsa==0.3.0 installed separately; the self-contained GitHub packages already include it. Open FastNSA > Runtime setup for step-by-step installation help. Packages are not installed automatically. Matplotlib is optional for interactive 3D views; other analyses work without it. macOS and QGIS 4/Qt6 are not supported in this release.
+changelog=0.1.1: Easier first-time setup with installation help and automatic detection of FastNSA in the recommended folder. First-time setup can enable the tools without restarting QGIS. Adds a source-only installation option alongside the self-contained Windows and Linux packages.
 tracker=https://github.com/fastnsa/FastNSA-QGIS/issues
 repository=https://github.com/fastnsa/FastNSA-QGIS
 homepage=https://github.com/fastnsa/FastNSA-QGIS
-category=Analysis
+category=Vector
 icon=resources/icon.png
 experimental=False
 deprecated=False

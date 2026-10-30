@@ -10,7 +10,7 @@ fields:
 | `point_id` | Sequential FastNSA event identifier for the run. |
 | `edge_id` | Internal edge identifier in the adapted road network. It is not necessarily the source road feature ID. |
 | `distance` | Point-to-network projection distance in road CRS units. |
-| `offset` | Distance from the native edge's first endpoint to the projected event position. |
+| `offset` | Distance along the matched road edge from its first endpoint to the projected event position. |
 | `method` | Matching method recorded for the output. |
 | `network_sig` | Fingerprint used to validate reuse with the selected road network. |
 
@@ -25,7 +25,7 @@ visible.
 
 | Field | Meaning |
 | --- | --- |
-| `edge_id` | Native edge containing the lixel. |
+| `edge_id` | Road edge containing the lixel, using FastNSA's edge numbering. |
 | `start_n1`, `end_n1` | Lixel start and end offsets measured from endpoint 1. |
 | `offset_n1`, `offset_n2` | Lixel center offsets measured from the two edge endpoints. |
 | `lixel_len` | Actual output segment length, including shortened terminal lixels. |
@@ -37,9 +37,9 @@ classes. Equal interval preserves equal numeric widths but can leave many
 classes empty when a few values dominate. Zero/non-positive density can be
 shown as a separate low class.
 
-Style persistence depends on the output type. Processing applies style to the
-layer loaded on completion and attempts to save the renderer into a GeoPackage
-output. Temporary layers retain style only within the active project/session.
+Processing styles the result when it is added to the map and also tries to
+save the style in a GeoPackage output. Temporary layers keep their style only
+while they remain available in the project or QGIS session.
 
 ## Network K Result Table
 
@@ -94,11 +94,12 @@ the QGIS project.
 
 ## Reading the Activity Log
 
-Adapter timings separate network conversion, event scanning/mapping, backend
-construction, native computation, and output stages. Cache messages mean:
+Timing messages show how much time was spent preparing the roads, matching
+events, calculating results, and saving outputs. They can help identify which
+step is slow. Cache messages mean:
 
 - `cache miss`: the network is being converted and stored;
-- `cache hit`: an unchanged in-memory native network was reused;
+- `cache hit`: the roads have not changed, so the previous preparation was reused;
 - `cache invalidated`: a related layer changed and its old entry was removed;
-- cache disabled: the input did not provide a safe revision identity, which is
-  expected for some Processing sources.
+- cache disabled: this input cannot be safely reused, so the roads are read
+  again. This is normal for some Processing inputs.

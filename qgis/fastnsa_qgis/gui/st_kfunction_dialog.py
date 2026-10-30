@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from math import isfinite
 
 from qgis.PyQt.QtCore import QLineF, QRectF, Qt
@@ -601,7 +600,6 @@ class _MatplotlibSurfaceWidget(QWidget):
         if self._figure is not None:
             return self._figure, self._canvas, self._axes, self._toolbar
 
-        os.environ.setdefault("MPLCONFIGDIR", "/tmp/fastnsa-mpl")
         try:
             from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
             from matplotlib.backends.backend_qtagg import NavigationToolbar2QT as NavigationToolbar

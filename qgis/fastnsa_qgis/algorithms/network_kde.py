@@ -362,18 +362,18 @@ class FastNetworkKdeAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "<p>Estimate network kernel density (NKDV) using LION or ADA with the "
-            "Epanechnikov kernel. Output is a lixel <b>line segment</b> layer, not points "
-            "or a raster.</p>"
+            "<p>Map event density along roads using LION or ADA with the Epanechnikov "
+            "kernel. The result is a <b>line segment</b> layer: each short road segment "
+            "(lixel) has a density value.</p>"
             "<p><b>Inputs:</b> Use a projected road CRS. Raw events are matched automatically; "
             "compatible Matched points reuse edge_id/offset and network_sig on the same "
             "unchanged network.</p>"
             "<p><b>Parameters:</b> Bandwidth is the smoothing radius; segment resolution "
             "is the target lixel length, with shorter final segments. Both use road CRS "
             "map units. Smaller segments increase output size.</p>"
-            "<p><b>Normalization and style:</b> Optional normalization scales a nonzero "
-            "density integral to 1 using actual segment lengths, before styling. Turbo "
-            "supports Quantile or Equal interval, a default of 12 classes, and a separate "
-            "zero-density class. Styling runs after the output layer is loaded; it is "
-            "not applied to an unloaded sink.</p>"
+            "<p><b>Colors and normalization:</b> Use the Turbo color ramp with Quantile "
+            "or Equal interval classes; the default is 12 classes. Zero-density segments "
+            "can have their own color. Add the result to QGIS to see the style. "
+            "If normalization is enabled, density is scaled so its integral along the "
+            "network is 1 (unless all values are zero), before colors are assigned.</p>"
         )

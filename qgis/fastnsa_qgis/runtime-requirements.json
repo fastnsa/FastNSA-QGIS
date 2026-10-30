@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "package": "fastnsa",
+  "version": "0.3.0",
+  "native_abi": 2,
+  "numpy_min_version": "1.23.5"
+}

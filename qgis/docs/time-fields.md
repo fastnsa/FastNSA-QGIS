@@ -1,8 +1,8 @@
 # Time Fields for Spatiotemporal Analysis
 
 FastNSA converts event times to elapsed values relative to the earliest event.
-Changing the origin does not change pairwise time differences and avoids using
-very large absolute timestamps in native calculations.
+This keeps the differences between event times unchanged, so you do not
+need to calculate elapsed times in the attribute table yourself.
 
 ## Interpretation Modes
 
@@ -14,9 +14,8 @@ very large absolute timestamps in native calculations.
 | Unix timestamp (seconds) | Values such as `1767225600` | Interprets values as Unix seconds before converting units. |
 | Unix timestamp (milliseconds) | Values such as `1767225600000` | Divides by 1000, then converts units. |
 
-Prefer an explicit mode for production workflows. Auto detection is convenient
-for exploration but cannot infer the semantic unit of an ordinary numeric
-field.
+If you know how your field stores time, choose that mode explicitly. Auto
+detection cannot tell whether an ordinary numeric value means hours or days.
 
 ## Analysis Units
 
@@ -58,10 +57,6 @@ When comparing old and new results, keep the road network, matched events,
 time interpretation, effective unit, thresholds, simulation seed, and estimator
 normalization identical. Earlier raw pair counts are not directly comparable
 with normalized K values. QGIS DateTime values retain millisecond precision.
-
-The Python/native ST text export now retains the input time unit and subtracts
-the earliest event time. Older native versions always divided exported times
-by 86400. This legacy export is not used by the plugin's direct computation.
 
 ## Validation Rules
 

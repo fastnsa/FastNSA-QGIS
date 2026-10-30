@@ -4,6 +4,38 @@ This maintainer guide describes GitHub Releases, not submission to the official
 QGIS plugin repository. User-facing installation steps belong in
 [Installation](docs/installation.md).
 
+## Source-Only Review Candidate
+
+Version 0.1.1 adds `--distribution external` to the packager and a separate
+`fastnsa-official-repository-candidate` CI artifact. This ZIP contains no
+FastNSA package, native library, wheel, or compiled cache. Validate it using the
+commands in [Development](DEVELOPMENT.md) and test both missing dependencies and
+an installed FastNSA 0.3.0 runtime in clean QGIS profiles.
+
+Do not upload a self-contained platform ZIP to the official repository.
+Do not assume that excluding binaries guarantees approval: the
+[publishing requirements](https://plugins.qgis.org/docs/publish/) allow declared
+external dependencies, while the
+[approval guidance](https://plugins.qgis.org/docs/approval) has stricter wording
+about binaries. Explain the external open-source PyPI runtime to QGIS reviewers
+and obtain guidance before submitting. The security scan and manual review are
+still required. The candidate is not automatically uploaded or approved.
+
+Before upload, run the [security precheck](DEVELOPMENT.md#security-precheck)
+on the final source-only ZIP and keep its checksum-linked report. A local
+pass with warnings is not the official scan result or approval. Do not add
+blanket scanner exclusions just to make the report appear clean.
+CI uploads `fastnsa-official-repository-candidate` only after this precheck
+passes. Keep the separate `fastnsa-source-security-report` summary with the
+matching ZIP checksum and source commit. Neither artifact is an approval.
+CI reviews only the exact provenance SHA supplied independently by GitHub;
+it remains visible in the report and does not exempt other secret findings.
+
+Retain the `fastnsa_qgis` plugin ID and use a new version; do not move 0.1.0's
+published tag or replace its installers. An old bundled installation must be
+removed cleanly before testing the source-only variant. User instructions are
+in [External Runtime](docs/external-runtime.md).
+
 ## Repository Setup
 
 1. Enable GitHub Actions in **Settings > Actions > General**. If the repository

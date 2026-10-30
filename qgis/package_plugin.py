@@ -17,6 +17,7 @@ import tempfile
 import zipfile
 from pathlib import Path, PurePosixPath
 
+from package_policy import MAX_SOURCE_ARCHIVE_BYTES, check_source_archive
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_SOURCE = REPO_ROOT / "qgis" / "fastnsa_qgis"
@@ -87,10 +88,22 @@ def _native_library_name() -> str:
 
 
 def _copy_plugin_tree(destination: Path):
+    def ignore(directory, names):
+        excluded = {name for name in names if name in {"__pycache__", ".git"}
+                    or name.endswith((".pyc", ".pyo"))}
+        if Path(directory) == PLUGIN_SOURCE:
+            excluded.update(name for name in names if name in {
+                "fastnsa", "fastnsa.libs", "distribution.json", "build-info.json"
+            } or name.startswith("fastnsa-"))
+        for name in set(names) - excluded:
+            if (Path(directory) / name).is_symlink():
+                raise ValueError(f"Symlink in plugin source: {name}")
+        return excluded
+
     shutil.copytree(
         PLUGIN_SOURCE,
         destination,
-        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+        ignore=ignore,
     )
 
 
@@ -204,28 +217,53 @@ def build_archive(
     *,
     wheel: Path | None = None,
     source_commit: str | None = None,
+    distribution: str = "bundled",
 ) -> Path:
-    if (native_library is None) == (wheel is None):
+    if distribution not in {"bundled", "external"}:
+        raise ValueError("Unknown plugin distribution mode.")
+    if distribution == "external" and (native_library is not None or wheel is not None):
+        raise ValueError("External-runtime packages cannot include a wheel or native library.")
+    if distribution == "bundled" and (native_library is None) == (wheel is None):
         raise ValueError("Provide exactly one of native_library or wheel.")
+    lock = read_runtime_lock()
+    requirements = json.loads((PLUGIN_SOURCE / "runtime-requirements.json").read_text(encoding="utf-8"))
+    if (requirements.get("package") != lock["package"] or requirements.get("version") != lock["version"]
+            or requirements.get("native_abi") != lock["native_abi"]):
+        raise ValueError("Plugin runtime requirements and runtime lock do not match.")
     config = configparser.ConfigParser()
     config.read(PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
     version = config.get("general", "version")
-    platform_tag = f"{platform.system().lower()}-{platform.machine().lower()}"
+    platform_tag = (f"{platform.system().lower()}-{platform.machine().lower()}"
+                    if distribution == "bundled" else "qgis-repository")
     output_dir.mkdir(parents=True, exist_ok=True)
     archive_path = output_dir / f"fastnsa_qgis-{version}-{platform_tag}.zip"
+    if archive_path.exists():
+        raise ValueError("Plugin archive already exists; use a new output directory.")
 
     with tempfile.TemporaryDirectory(prefix="fastnsa-qgis-") as temporary_dir:
         package_root = Path(temporary_dir) / "fastnsa_qgis"
         _copy_plugin_tree(package_root)
-        if wheel is not None:
+        if distribution == "external":
+            runtime_info = {
+                "runtime_lock_verified": False,
+                "runtime_version_requirement": requirements["version"],
+                "runtime_abi_requirement": requirements["native_abi"],
+            }
+        elif wheel is not None:
             runtime_info = _copy_wheel_runtime(package_root / "fastnsa", wheel)
         else:
             _copy_runtime(package_root / "fastnsa", native_library)
             runtime_info = {
                 "native_library_sha256": hashlib.sha256(native_library.read_bytes()).hexdigest(),
                 "runtime_lock_verified": False,
+                "runtime_version": requirements["version"],
+                "runtime_abi": requirements["native_abi"],
             }
         _copy_release_docs(package_root)
+        (package_root / "distribution.json").write_text(
+            json.dumps({"schema_version": 1, "mode": distribution}, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
         commit = source_commit or os.environ.get("GITHUB_SHA")
         if not commit:
@@ -237,9 +275,10 @@ def build_archive(
                 commit = None
         build_info = {
             "plugin_version": version,
+            "distribution": distribution,
             "source_commit": commit,
-            "platform": platform.system(),
-            "architecture": platform.machine(),
+            "platform": platform.system() if distribution == "bundled" else "any",
+            "architecture": platform.machine() if distribution == "bundled" else "any",
             "built_at_utc": datetime.now(timezone.utc).isoformat(),
             "ci_run_url": (
                 f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}"
@@ -258,6 +297,16 @@ def build_archive(
                 if path.is_file():
                     archive.write(path, path.relative_to(package_root.parent))
 
+        if distribution == "external":
+            try:
+                with zipfile.ZipFile(archive_path) as archive:
+                    check_source_archive(archive)
+                if archive_path.stat().st_size > MAX_SOURCE_ARCHIVE_BYTES:
+                    raise ValueError("Plugin source ZIP exceeds 25 MB.")
+            except Exception:
+                archive_path.unlink()
+                raise
+
     checksum = hashlib.sha256(archive_path.read_bytes()).hexdigest()
     archive_path.with_suffix(".zip.sha256").write_text(
         f"{checksum}  {archive_path.name}\n", encoding="ascii"
@@ -274,7 +323,8 @@ def main():
         type=Path,
         default=REPO_ROOT / "qgis" / "dist",
     )
-    runtime_source = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument("--distribution", choices=("bundled", "external"), default="bundled")
+    runtime_source = parser.add_mutually_exclusive_group()
     runtime_source.add_argument(
         "--native-library",
         type=Path,
@@ -289,6 +339,7 @@ def main():
     archive = build_archive(
         arguments.output_dir, arguments.native_library,
         wheel=arguments.wheel, source_commit=arguments.source_commit,
+        distribution=arguments.distribution,
     )
     print(archive)
 

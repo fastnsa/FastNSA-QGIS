@@ -15,6 +15,8 @@ builder = archive_tests.builder
 with patch.dict("sys.modules", {"package_plugin": builder}):
     release = archive_tests.load_tool("plugin_release", "release_plugin.py")
 
+VERSION = release.release_metadata()[0]
+
 
 class ReleaseTest(unittest.TestCase):
     setUp = archive_tests.PluginArchiveTest.setUp
@@ -22,7 +24,7 @@ class ReleaseTest(unittest.TestCase):
     make_wheel = archive_tests.PluginArchiveTest.make_wheel
 
     commit = "a" * 40
-    ref = "refs/tags/v0.1.0"
+    ref = f"refs/tags/v{VERSION}"
 
     def make_packages(self, root):
         for system, machine in (("Linux", "x86_64"), ("Windows", "AMD64")):
@@ -53,10 +55,10 @@ class ReleaseTest(unittest.TestCase):
 
     def test_preflight_requires_matching_tag(self):
         version, tag, _, _ = release.release_metadata(self.ref)
-        self.assertEqual(version, "0.1.0")
-        self.assertEqual(tag, "v0.1.0")
+        self.assertEqual(version, VERSION)
+        self.assertEqual(tag, f"v{VERSION}")
         with self.assertRaisesRegex(ValueError, "tag does not match"):
-            release.release_metadata("refs/tags/v0.1.1")
+            release.release_metadata("refs/tags/v99.0.0")
 
     def test_assemble_and_verify_both_platforms(self):
         with tempfile.TemporaryDirectory() as temporary:

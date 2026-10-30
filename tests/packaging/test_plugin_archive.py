@@ -6,7 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 import platform
+import re
 import struct
+import sys
 import tempfile
 import unittest
 import zipfile
@@ -20,7 +22,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def load_tool(name, filename):
     spec = importlib.util.spec_from_file_location(name, ROOT / "qgis" / filename)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    with patch.object(sys, "path", [str(ROOT / "qgis"), *sys.path]):
+        spec.loader.exec_module(module)
     return module
 
 
@@ -110,6 +113,86 @@ class PluginArchiveTest(unittest.TestCase):
             self.assertIn(repository, text)
             self.assertNotIn("FastNSA" + "-dev", text)
 
+    def test_user_setup_guide_keeps_actions_paths_and_install_safety_in_sync(self):
+        guide = (ROOT / "qgis/docs/external-runtime.md").read_text(encoding="utf-8")
+        policy = json.loads((builder.PLUGIN_SOURCE / "runtime-requirements.json").read_text())
+        version = policy["version"]
+        for text in (
+            "# Set Up FastNSA", "Installation status", "Custom installation folder",
+            "Check again", "Save and enable", "Details for support",
+            f"fastnsa=={version}", f"%APPDATA%\\FastNSA\\runtime-{version}",
+            f"$HOME/.local/share/FastNSA/runtime-{version}",
+            "--only-binary=:all:", "--no-deps", "restart QGIS",
+        ):
+            self.assertIn(text, guide)
+        self.assertNotIn("Save directory for next restart", guide)
+        metadata = configparser.ConfigParser()
+        metadata.read(builder.PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
+        about = metadata["general"]["about"]
+        self.assertIn(f"fastnsa=={version}", about)
+        self.assertIn(f"NumPy >= {policy['numpy_min_version']}", about)
+        self.assertIn("external", about)
+        for maintainer_term in ("ABI", "acceptance", "approval", "compiled-file"):
+            self.assertNotIn(maintainer_term, metadata["general"]["changelog"])
+
+    def test_package_readmes_link_to_the_homepage_and_resolvable_local_guides(self):
+        for filename in ("README.md", "README_ZH.md"):
+            text = (ROOT / "qgis" / filename).read_text(encoding="utf-8")
+            self.assertIn("https://github.com/fastnsa/FastNSA-QGIS", text)
+            self.assertNotIn("![", text, "Repository screenshots do not belong in the package navigation")
+            self.assertNotIn("## What Can You Analyze?", text)
+            for target in re.findall(r"\[[^\]]+\]\(([^)]+)\)", text):
+                if target.startswith(("https://", "#")):
+                    continue
+                self.assertTrue((ROOT / "qgis" / target).is_file(), f"Broken package link: {filename}: {target}")
+
+    def test_ci_provides_both_distributions_without_mixing_release_assets(self):
+        workflow = plugin_workflow("multiplatform.yml").read_text(encoding="utf-8")
+        self.assertIn("name: fastnsa-official-repository-candidate", workflow)
+        self.assertIn("--expect-distribution external", workflow)
+        self.assertIn("--expect-distribution bundled", workflow)
+        self.assertIn("--external-runtime-root", workflow)
+        self.assertIn("name: fastnsa-external-runtime-check-${{ matrix.os }}", workflow)
+        self.assertIn("path: dist/external/*.validation.json", workflow)
+        self.assertIn("$GITHUB_STEP_SUMMARY", workflow)
+        self.assertNotIn("name: fastnsa-qgis-source", workflow)
+        private = ROOT / ".github/workflows/qgis-packages.yml"
+        if private.is_file():
+            self.assertEqual(
+                private.read_text(encoding="utf-8").split("\njobs:\n", 1)[1],
+                workflow.split("\njobs:\n", 1)[1],
+            )
+
+    def test_ci_gates_the_source_candidate_on_its_exact_archive_scan(self):
+        workflow = plugin_workflow("multiplatform.yml").read_text(encoding="utf-8")
+        source_job = workflow.split("\n  source-only-package:\n", 1)[1].split(
+            "\n  qgis-package:\n", 1
+        )[0]
+        checks = (
+            "python qgis/package_plugin.py --distribution external --output-dir source-dist",
+            "python qgis/validate_package.py source-dist/*.zip --expect-distribution external",
+            "python -m pip --isolated install --requirement qgis/security-requirements.txt",
+            "python qgis/scan_package.py source-dist/*.zip --output-dir source-security-reports",
+            "name: fastnsa-official-repository-candidate",
+        )
+        positions = [source_job.index(check) for check in checks]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("id: security-precheck", source_job)
+        self.assertIn('--expected-source-commit "$GITHUB_SHA"', source_job)
+        self.assertIn("always() && steps.security-precheck.outcome != 'skipped'", source_job)
+        self.assertIn("name: fastnsa-source-security-report", source_job)
+        self.assertIn("path: source-security-reports/summary.json", source_job)
+        self.assertNotIn("path: source-security-reports/*", source_job)
+        self.assertNotIn("continue-on-error", source_job)
+        self.assertNotIn("|| true", source_job)
+        candidate_upload = source_job.split(
+            "name: fastnsa-official-repository-candidate", 1
+        )[0].rsplit("      - uses: actions/upload-artifact@v4", 1)[1]
+        self.assertNotIn("if:", candidate_upload)
+        requirements = (ROOT / "qgis/security-requirements.txt").read_text(encoding="utf-8")
+        for name in ("bandit", "detect-secrets", "flake8"):
+            self.assertRegex(requirements, rf"(?m)^{name}==\d+\.\d+\.\d+$")
+
     def make_wheel(self, directory, *, platform_tag=None, omit=None, metadata_version=None):
         target = builder.target_platform()
         version = self.lock["version"]
@@ -157,6 +240,7 @@ class PluginArchiveTest(unittest.TestCase):
                 self.assertIn("fastnsa_qgis/fastnsa.libs/.load-order-fastnsa", archive.namelist())
                 info = json.loads(archive.read("fastnsa_qgis/build-info.json"))
                 self.assertEqual(info["source_commit"], "test-commit")
+                self.assertEqual(archive.read("fastnsa_qgis/README.md"), (ROOT / "qgis/README.md").read_bytes())
                 self.assertEqual(info["runtime_version"], self.lock["version"])
                 self.assertTrue(info["runtime_lock_verified"])
                 self.assertEqual(info["runtime_abi"], self.lock["native_abi"])

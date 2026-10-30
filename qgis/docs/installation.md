@@ -1,85 +1,77 @@
-# Installation
+# Install FastNSA for QGIS
 
-## Supported Platforms
+These instructions describe version `0.1.1`, currently being prepared for
+release. It is not yet available in the official QGIS plugin directory.
 
-FastNSA for QGIS `0.1.0` supports:
+## Choose an Installation Package
 
-- Linux x86_64 and Windows AMD64 archives;
-- QGIS 3.34 through QGIS 3.x, using Qt5;
-- Python 3.11 or newer in the QGIS environment;
-- NumPy available in the QGIS Python environment;
-- a compatible C++ system runtime.
+| Package | Best for | Separate FastNSA installation? |
+| --- | --- | --- |
+| Self-contained Windows or Linux ZIP | Getting started with fewer setup steps | No |
+| Source-only ZIP | Using a separate FastNSA installation | Yes, `fastnsa==0.3.0` |
 
-Download one of these assets from
-[GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases):
+Download released self-contained packages from
+[GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases). Choose the
+version you want to install and the archive for your system.
 
-| Platform | Installable archive |
+For version 0.1.1 test builds, the package names are:
+
+| System | Self-contained package |
 | --- | --- |
-| Linux x86_64 | `fastnsa_qgis-0.1.0-linux-x86_64.zip` |
-| Windows AMD64 | `fastnsa_qgis-0.1.0-windows-amd64.zip` |
+| Linux x86_64 | `fastnsa_qgis-0.1.1-linux-x86_64.zip` |
+| Windows AMD64 | `fastnsa_qgis-0.1.1-windows-amd64.zip` |
 
-These archives bundle the checksum-verified FastNSA 0.3.0 runtime. No separate
-FastNSA installation is needed. macOS plugin archives, QGIS 4.x, and Qt6 are not
-supported. The Windows acceptance baseline is QGIS 3.34 with Python 3.12.7,
-NumPy 1.26.4, and Qt 5.15.13.
+The source-only test package is
+`fastnsa_qgis-0.1.1-qgis-repository.zip`. If downloading from GitHub Actions,
+choose `fastnsa-official-repository-candidate`, extract the download, and use
+the plugin ZIP inside it.
 
-Install the plugin ZIP, not GitHub's automatically generated **Source code** ZIP
-or the outer ZIP downloaded from an Actions artifact. Each installer has a
-matching `.zip.sha256` checksum file. Full build and validation reports are kept
-in the Actions artifact. Maintainer validation steps are in the
-[release guide](https://github.com/fastnsa/FastNSA-QGIS/blob/main/qgis/RELEASING.md).
+Do not install GitHub's automatically generated **Source code** ZIP or the
+outer ZIP downloaded from Actions. If you want to check a download's
+integrity, its matching `.zip.sha256` file contains the expected checksum.
+
+## Requirements
+
+- Windows AMD64 or Linux x86_64.
+- QGIS 3.34 through QGIS 3.x with Qt5.
+- Python 3.11 or newer and NumPy 1.23.5 or newer in QGIS.
+- A compatible system C++ runtime for FastNSA's analysis library.
+
+macOS and QGIS 4/Qt6 are not supported in this version. Matplotlib is optional
+and only needed for interactive 3D surfaces.
+
+You do not need pandas, GeoPandas, Shapely, NetworkX, or OSMnx to use the plugin.
+See [Software Requirements](../DEPENDENCIES.md) for more detail.
 
 ## Install from ZIP
 
-1. Download the archive for the correct operating system and CPU architecture.
-2. Open **Plugins > Manage and Install Plugins > Install from ZIP**.
-3. Select the FastNSA ZIP and accept QGIS's installation prompt. Only install
-   plugins from a source you trust; this package includes native code.
-4. Enable **FastNSA** in the installed plugin list.
-5. Confirm that the FastNSA toolbar action opens the main dialog.
-6. Confirm that **Processing Toolbox > FastNSA** lists four algorithms.
+1. Open **Plugins > Manage and Install Plugins > Install from ZIP** in QGIS.
+2. Select the plugin ZIP for your system and accept the installation prompt.
+   Only install software from a source you trust.
+3. In the **Installed** list, make sure **FastNSA** is checked.
+4. Open FastNSA from its toolbar button or **Plugins > FastNSA**.
+5. If the setup window opens, follow [Set Up FastNSA](external-runtime.md),
+   then click **Check again**.
+6. Once setup is complete, the four analysis tools appear under
+   **Processing Toolbox > FastNSA**.
 
-Restart QGIS if the Processing provider does not appear immediately.
+The self-contained ZIP already includes FastNSA 0.3.0. With the source-only
+ZIP, install FastNSA separately using QGIS's Python or the recommended user
+folder. The plugin does not download or install packages automatically.
 
-## Bundled and Host Dependencies
+For your first analysis, follow the [Quick Start](quickstart.md).
 
-The plugin archive bundles the lightweight FastNSA Python runtime and the
-platform-specific native library. It does not require pandas, GeoPandas,
-Shapely, NetworkX, or OSMnx.
+## Upgrade an Existing Installation
 
-The QGIS/host environment supplies NumPy and operating-system runtime
-libraries. Matplotlib is optional: it enables interactive ST 3D surfaces but
-does not affect tables, summaries, 2D views, or other analyses.
+1. Finish or cancel any running FastNSA analysis and save your project.
+2. Install the new plugin ZIP.
+3. Restart QGIS before using the updated plugin.
 
-See [DEPENDENCIES.md](../DEPENDENCIES.md) for platform requirements and current
-distribution status.
+If the installer says it succeeded but the FastNSA menu is missing, restart
+QGIS and check that FastNSA is enabled in the **Installed** list. If it still
+does not appear, see [Troubleshooting](troubleshooting.md).
 
-## Clean-Profile Verification
-
-Release validation should use a new QGIS profile without repository paths or
-an editable FastNSA installation:
-
-1. Start QGIS with a clean profile.
-2. Install only the release ZIP.
-3. Open the plugin and inspect its startup diagnostic.
-4. Run nearest-edge matching on a small projected network.
-5. Run one NKDV and one K-function analysis.
-6. Restart QGIS and verify that the plugin and Processing provider load again.
-
-If the plugin works only when the repository's `python/` directory is on
-`PYTHONPATH`, the release archive is incomplete.
-
-## Upgrading
-
-Disable or uninstall the old plugin before installing a ZIP with a changed
-native library. Restart QGIS after replacement so the process does not retain
-the previously loaded shared library. Use a separate test profile when
-comparing two plugin versions.
-
-## Development Installation
-
-Do not use an editable Python installation to validate a public plugin ZIP. It
-can hide missing bundled modules and native libraries. Maintainer build and
-source-testing steps are in the
-[development guide](https://github.com/fastnsa/FastNSA-QGIS/blob/main/qgis/DEVELOPMENT.md),
-which is intentionally excluded from the plugin archive.
+When switching between self-contained and source-only packages, uninstall the
+old plugin and close QGIS before installing the other type. They are
+alternatives, not two plugins to install together in the same profile.
+See [Set Up FastNSA](external-runtime.md) for the full steps.

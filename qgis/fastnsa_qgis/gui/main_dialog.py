@@ -1,7 +1,6 @@
 """Main workflow dialog for the FastNSA plugin."""
 
 from pathlib import Path
-from typing import Optional
 
 from qgis.PyQt.QtCore import Qt, QTimer, QUrl, pyqtSignal
 from qgis.PyQt.QtGui import QDesktopServices
@@ -9,7 +8,6 @@ from qgis.PyQt.QtWidgets import (
     QApplication,
     QButtonGroup,
     QCheckBox,
-    QComboBox,
     QDialog,
     QFileDialog,
     QFrame,
@@ -24,7 +22,6 @@ from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QScrollArea,
     QSizePolicy,
-    QSpinBox,
     QSplitter,
     QStackedWidget,
     QTextEdit,

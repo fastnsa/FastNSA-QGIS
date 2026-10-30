@@ -28,6 +28,9 @@ class QgisAdapterTest(unittest.TestCase):
 
         cls.app = qgis_test_application()
 
+        from fastnsa_qgis.utils.bootstrap import require_runtime_dependencies
+        require_runtime_dependencies()
+
         from fastnsa_qgis.adapters.fastnsa_to_qgs import (
             build_nearest_edge_result_from_pointset,
             nearest_edge_result_to_qgs_layers,
@@ -226,6 +229,60 @@ class QgisAdapterTest(unittest.TestCase):
                     finally:
                         dialog.close()
                         dialog.deleteLater()
+
+    def test_missing_matplotlib_keeps_result_viewers_and_tables_available(self):
+        import builtins
+        import numpy as np
+        from qgis.PyQt.QtWidgets import QComboBox, QTableWidget, QTabWidget, QTextEdit
+        from fastnsa.core.types import KFunctionResult, SpatiotemporalKFunctionResult
+        from fastnsa_qgis.gui.kfunction_chart_dialog import KFunctionChartDialog
+        from fastnsa_qgis.gui.st_kfunction_dialog import (
+            SpatiotemporalKFunctionDialog, _HeatmapCanvas, _MatplotlibSurfaceWidget,
+        )
+
+        original_import = builtins.__import__
+        blocked = []
+
+        def without_matplotlib(name, *args, **kwargs):
+            if name == "matplotlib" or name.startswith("matplotlib."):
+                blocked.append(name)
+                raise ModuleNotFoundError("No module named 'matplotlib'", name="matplotlib")
+            return original_import(name, *args, **kwargs)
+
+        st_result = SpatiotemporalKFunctionResult(
+            s=np.array([0.0, 100.0]), t=np.array([0.0, 1.0]),
+            k_obs=np.array([[0.0, 0.0], [0.0, 2.0]]), n_points=7,
+        )
+        k_result = KFunctionResult(r=st_result.s, k_obs=np.array([0.0, 2.0]), n_points=7)
+        with patch("builtins.__import__", side_effect=without_matplotlib):
+            for viewer, result, row_count in (
+                (SpatiotemporalKFunctionDialog, st_result, 4),
+                (KFunctionChartDialog, k_result, 2),
+            ):
+                with self.subTest(viewer=viewer.__name__):
+                    dialog = viewer(result)
+                    try:
+                        tabs = dialog.findChild(QTabWidget)
+                        labels = [tabs.tabText(index) for index in range(tabs.count())]
+                        self.assertIn("Table", labels)
+                        self.assertIn("Summary", labels)
+                        self.assertEqual(dialog.findChild(QTableWidget).rowCount(), row_count)
+                        self.assertTrue(any(edit.toPlainText() for edit in dialog.findChildren(QTextEdit)))
+                        if viewer is SpatiotemporalKFunctionDialog:
+                            self.assertTrue(dialog.findChildren(_HeatmapCanvas))
+                            surface = dialog.findChild(_MatplotlibSurfaceWidget)
+                            self.assertIsNone(surface._canvas)
+                            self.assertIn("No module named 'matplotlib'", surface._status_label.text())
+                            for combo in surface.parentWidget().findChildren(QComboBox):
+                                for index in range(combo.count()):
+                                    combo.setCurrentIndex(index)
+                            self.assertIsNone(surface._canvas)
+                            self.assertIn("could not be initialized", surface._status_label.text())
+                    finally:
+                        dialog.close()
+                        dialog.deleteLater()
+        self.assertIn("matplotlib.backends.backend_qtagg", blocked)
+        self.assertIn("matplotlib.backends.backend_qt5agg", blocked)
 
     def test_distance_analysis_requires_projected_road_crs(self):
         geographic_roads = QgsVectorLayer(
@@ -758,6 +815,27 @@ class QgisAdapterTest(unittest.TestCase):
         self.assertTrue(apply_density_style(zero_layer))
         self.assertEqual(zero_layer.renderer().symbol().color().name(), "#30123b")
 
+    def test_density_style_skips_invalid_values_without_hiding_programming_errors(self):
+        from fastnsa_qgis.adapters.fastnsa_to_qgs import apply_density_style
+
+        layer = MagicMock()
+        layer.fields.return_value.indexOf.return_value = 0
+        layer.geometryType.return_value = 1
+        layer.getFeatures.return_value = [
+            {"density": value}
+            for value in (None, "not a number", float("nan"), float("inf"), 10 ** 10000, 0.0, 1.0)
+        ]
+        self.assertTrue(apply_density_style(layer))
+        layer.setRenderer.assert_called_once()
+
+        class BrokenValue:
+            def __float__(self):
+                raise RuntimeError("Unexpected provider failure")
+
+        layer.getFeatures.return_value = [{"density": BrokenValue()}]
+        with self.assertRaisesRegex(RuntimeError, "Unexpected provider failure"):
+            apply_density_style(layer)
+
     def test_main_window_and_progress_can_hide_and_restore(self):
         from fastnsa_qgis.gui.main_dialog import FastNSAMainDialog, _TaskProgressDialog
 
@@ -903,9 +981,9 @@ class QgisAdapterTest(unittest.TestCase):
 
         for algorithm_class, expected in (
             (FastNearestEdgeMatchingAlgorithm,
-             ("source locations", "offset", "network_sig", "map units", "legacy alias")),
+             ("source locations", "offset", "network_sig", "map units", "older saved models")),
             (FastNetworkKdeAlgorithm,
-             ("line segment", "lion", "ada", "epanechnikov", "not applied to an unloaded sink")),
+             ("line segment", "lion", "ada", "epanechnikov", "add the result to qgis")),
             (FastNetworkKFunctionAlgorithm,
              ("ns (exact)", "stars", "95% pointwise", "without simulations", "k_theo")),
             (FastSpatiotemporalNetworkKFunctionAlgorithm,

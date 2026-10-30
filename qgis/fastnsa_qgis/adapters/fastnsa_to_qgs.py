@@ -320,7 +320,7 @@ def apply_density_style(
             value = float(feature["density"])
             if isfinite(value):
                 values.append(value)
-        except Exception:
+        except (TypeError, ValueError, OverflowError):
             continue
 
     if not values:

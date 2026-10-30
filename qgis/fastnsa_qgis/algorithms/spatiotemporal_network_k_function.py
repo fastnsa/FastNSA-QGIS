@@ -417,8 +417,9 @@ class FastSpatiotemporalNetworkKFunctionAlgorithm(QgsProcessingAlgorithm):
 
     def shortHelpString(self):
         return (
-            "<p>Compute normalized spatiotemporal network K(s, t) using EARTH (default), "
-            "MTS, EAR, SPS or RQS. These are alternative strategies for the same estimator.</p>"
+            "<p>Explore event patterns across network distance and time with the "
+            "spatiotemporal K-function. Start with EARTH (default), or choose MTS, EAR, "
+            "SPS or RQS as another way to calculate the same K(s, t) measure.</p>"
             "<p><b>Inputs:</b> A projected road network and at least two point events with "
             "a non-null time field and positive time span. Raw events are matched "
             "automatically; compatible Matched points reuse their mapping on the same "
@@ -430,7 +431,8 @@ class FastSpatiotemporalNetworkKFunctionAlgorithm(QgsProcessingAlgorithm):
             "their native unit. Temporal thresholds must use that same unit.</p>"
             "<p><b>Monte Carlo:</b> Simulate events uniformly by network length and over "
             "the observed time range to obtain nominal 95% pointwise quantile bounds. "
-            "Five simulations is a quick-test default, not a reliable inference setting.</p>"
+            "Start with 5 simulations to try the workflow; use a suitably larger count "
+            "for statistical interpretation.</p>"
             "<p><b>Outputs:</b> A temporary or saved no-geometry table and optional CSV "
             "with s, t, k_obs, k_lo, k_hi, status, time_unit, time_origin and time_mode. "
             "Without simulations, bounds are empty and status is unbounded. Run the "

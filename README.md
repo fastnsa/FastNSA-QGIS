@@ -90,6 +90,11 @@ Download the **plugin ZIP for your platform** from
 Use the platform-specific plugin ZIP, not GitHub's **Source code** archive.
 The package includes FastNSA 0.3.0; no separate FastNSA installation is needed.
 
+**Source-only installations:** These need `fastnsa==0.3.0` installed separately.
+Open **FastNSA > Runtime setup** for guidance, or follow the
+[FastNSA setup guide](qgis/docs/external-runtime.md). The platform-specific
+GitHub packages described above already include the runtime.
+
 **Requirements:** QGIS 3.34 through QGIS 3.x with Qt5, Python 3.11 or newer,
 NumPy, and a compatible system C++ runtime. Matplotlib is optional and enables
 interactive 3D surfaces. macOS plugin packages and QGIS 4/Qt6 are not supported

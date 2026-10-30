@@ -15,7 +15,6 @@ from qgis.PyQt.QtCore import QDate, QDateTime
 from qgis.core import (
     NULL,
     QgsCoordinateTransform,
-    QgsFeature,
     QgsFeatureSource,
     QgsFields,
     QgsGeometry,

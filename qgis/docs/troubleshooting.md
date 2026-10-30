@@ -1,112 +1,131 @@
 # Troubleshooting
 
-## Plugin Does Not Load
+## FastNSA Is Installed but Its Menu Is Missing
 
-Read the startup diagnostic and QGIS Python error before installing extra
-packages. Common causes are:
+After updating the plugin, save your project and restart QGIS. Then open
+**Plugins > Manage and Install Plugins > Installed** and make sure FastNSA
+is checked.
 
-- NumPy is unavailable in the Python environment used by QGIS;
-- the archive contains a native library for another OS or architecture;
-- GLIBC or GLIBCXX runtime symbols are unavailable;
-- the archive is incomplete and accidentally relies on a repository or
-  editable installation.
+If the menu is still missing, check **View > Panels > Log Messages** for a
+Python or plugin error. Include that message when asking for help.
 
-Do not install packages into an unrelated system Python. Identify the Python
-interpreter used by the running QGIS installation first.
+## The Setup Window Opens Instead of the Analysis Tools
 
-## Processing Provider Is Missing
+Open **FastNSA > Runtime setup** and follow the message on
+**Installation status**. If FastNSA is missing, use the
+[installation guide](external-runtime.md) for your system.
 
-Restart QGIS after installation, confirm that FastNSA is enabled, and inspect
-the plugin error log. A healthy installation registers four algorithms under
+After a first installation, click **Check again**. If you used a custom
+folder, choose the folder containing `fastnsa` and click **Save and enable**.
+Clear a saved old folder if you want FastNSA to be found automatically.
+
+If a restart is requested, QGIS has already used another installation or an
+earlier attempt to load it did not finish. Save your work and restart QGIS.
+Do not replace package files while QGIS is using them.
+
+For NumPy problems, repair the QGIS Python environment rather than installing
+into an unrelated Python. If a message mentions GLIBC, GLIBCXX, or a missing
+DLL, check that you have the correct package for your system and include the
+full error in a support request.
+
+## FastNSA Is Missing from the Processing Toolbox
+
+First check **Runtime setup**: the analysis tools are enabled only after
+FastNSA is ready. A working installation lists four algorithms under
 **Processing Toolbox > FastNSA**.
 
-## Road CRS Is Rejected
+After upgrading the plugin, restart QGIS and confirm FastNSA is still enabled.
+If setup says it is ready but the tools remain missing, share the plugin log
+with your support request.
 
-FastNSA requires a projected road CRS for distance analysis. Assigning a
-projected CRS label without transforming coordinates is not sufficient. Use
-QGIS **Reproject layer** and verify that the resulting map units and extent are
-plausible.
+## The Road CRS Is Rejected
 
-Event points may remain in another valid CRS because the adapter transforms
-them to the road CRS.
+Use a road layer in a projected CRS. Simply assigning a different CRS label
+does not transform the coordinates. Use QGIS **Reproject layer**, then check
+the map units and that the roads still appear in the correct location.
 
-## Mapped Points Are Rejected
+Event points can use another valid CRS; FastNSA transforms them to match the
+roads.
 
-The `network_sig` in matched points does not match the selected road layer.
-This can happen after editing geometry, changing CRS, reordering features, or
-using another network export. Re-run nearest-edge matching with the current
-road layer.
+## Matched Points Are Rejected
 
-If an old mapped layer has no `network_sig`, FastNSA may warn and continue, but
-the mapping cannot be proven compatible.
+The roads may have changed since the events were matched. This can happen
+after editing geometry, changing CRS, reordering features, or using another
+road export. Run nearest-edge matching again with the road layer you want
+to analyze.
 
-## Projection Distances Are Too Large
+FastNSA checks the `network_sig` field to identify the road network. Older
+matched layers without it may be accepted with a warning, but cannot be
+checked in the same way.
 
-Check the road/event CRS metadata, road-network coverage, and source point
-quality. Display projected points and connector lines. A mathematically nearest
-road may still be semantically wrong when the network omits local streets or
-contains unrelated transport links.
+## Events Are Matched to Distant Roads
 
-## NKDV Layer Has No Style
+Check the coordinate systems and make sure the road network covers your
+events. Display projected points and connector lines to inspect the matches.
 
-Confirm **Apply default FastNSA style** was enabled and the output was loaded
-on completion. The renderer needs a usable `density` field. For persistent
-GeoPackage output, inspect the Processing log for a style-database error.
+The nearest available road is not always the right road for an event. Your
+network may be missing local streets or may include unrelated transport
+features.
+
+## The Density Layer Has No Colors
+
+Check that **Apply default FastNSA style** was enabled and the result was
+added to the map. The layer needs a usable `density` field. If a saved
+GeoPackage loses its style when reopened, check the Processing log for a
+style-saving error.
 
 All-zero results use a single low-color symbol. With separate zero enabled,
-non-positive values do not consume the positive Turbo classes.
+zero and non-positive values do not use the positive Turbo color classes.
 
-## K or ST K Is Slow
+## K-Function Takes a Long Time
 
-Runtime depends on network size, active source edges, threshold count, method,
-and simulations. Start by:
+Calculation time depends on the road network, events, thresholds, selected
+method, and number of simulations. To get a first result sooner:
 
-1. disabling Monte Carlo;
-2. using a coarser/smaller threshold range;
-3. testing a smaller network or event subset;
-4. reusing matched points;
-5. checking the log for a native-network cache hit;
-6. comparing NS/reference methods with STARS or EARTH only after validating
-   a small case.
+1. Turn off Monte Carlo, or start with a small simulation count.
+2. Reduce the distance/time range or use larger steps.
+3. Try a smaller study area or event subset.
+4. Reuse matched points with the same road network.
+5. Check the activity log to see which stage takes the most time.
 
-Five simulations are the current smoke-test default, not a performance-free
-setting.
+For larger network K analyses, consider STARS if an approximate result is
+suitable. For spatiotemporal analysis, try EARTH after checking the inputs on
+a small example.
 
-## Cancellation Is Not Immediate
+Five simulations are useful for trying the workflow, but may still take time
+on a large network and are generally too few for statistical inference.
 
-Cancellation is cooperative. The native backend checks at safe points rather
-than killing its worker thread. The progress dialog changes to a cancellation
-request message while the current native step finishes or reaches a check.
+## Cancel Does Not Stop Immediately
 
-Do not force-close QGIS during normal delayed cancellation unless the process
-is genuinely unresponsive for an exceptional period; forced termination can
-interrupt unrelated QGIS writes.
+Click **Cancel** once and wait for the task to confirm it has stopped. Some
+calculation steps take time to respond. Avoid force-closing QGIS while it is
+saving files, as this can interrupt other work in the project.
 
-## Main Window or Task Details Are Hidden
+## The Analysis or Progress Window Is Hidden
 
-Background mode intentionally hides both FastNSA windows. Use the FastNSA
-toolbar action or the status-bar **Show** button to restore the main dialog and
-active task details.
+Clicking **Hide Windows & Run in Background** hides the FastNSA windows so you
+can use the map. Use the FastNSA toolbar button or the status-bar **Show**
+button to bring them back.
 
-## Matplotlib 3D Is Unavailable
+## The 3D View Is Unavailable
 
-Install Matplotlib into the QGIS Python environment if 3D interaction is
-required. The built-in tables and 2D result views remain available without it.
-Toolbars can also be hard to see under some QGIS themes; test both the QGIS
-theme and Matplotlib canvas before treating a missing-looking icon as a missing
-action.
+Matplotlib must be installed in QGIS's Python environment for interactive 3D
+views. Tables, summaries, and 2D views work without it.
 
-## QGIS Terminates with Signal 11
+If toolbar icons are difficult to see, try another QGIS theme before assuming
+a button is missing.
 
-A segmentation fault occurs outside Python exception handling and can end the
-whole QGIS process. Collect:
+## QGIS Closes Unexpectedly
 
-- plugin, QGIS, Python, NumPy, and operating-system versions;
-- method and every parameter;
-- event count, road feature count, CRS, and data-source type;
+An error in the analysis library can close QGIS before a normal Python
+message appears. To help us investigate, include:
+
+- QGIS, FastNSA plugin, Python, NumPy, and operating-system versions;
+- the analysis method and settings;
+- event and road counts, coordinate systems, and input formats;
 - whether matched points and Monte Carlo were used;
-- the last progress stage and QGIS log;
-- a minimal reproducible dataset when licensing permits.
+- the last progress message and available QGIS logs;
+- a small example dataset, if you have permission to share it.
 
-Report these through the project issue tracker. `QgsTask` keeps the interface
-responsive but does not isolate native crashes in another process.
+Send reports to [GitHub Issues](https://github.com/fastnsa/FastNSA-QGIS/issues).
+Review logs and file paths for private information before posting.

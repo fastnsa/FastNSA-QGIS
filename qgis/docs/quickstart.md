@@ -15,14 +15,14 @@ Information** and confirm that its units are appropriate for your distance
 parameters. Reproject a longitude/latitude road layer before analysis.
 
 Event points may use a different valid CRS. FastNSA transforms them to the road
-CRS during adaptation.
+CRS before analysis.
 
 ## 2. Preprocess Reusable Events
 
 Open FastNSA and select **Fast Nearest Edge Matching**.
 
 1. Choose the event and road layers.
-2. Keep **R-tree** for a conservative first run.
+2. Keep **R-tree** for your first run.
 3. Enable projected points or point-to-edge lines if you want visual quality
    control.
 4. Use a temporary output for the first run.
@@ -55,11 +55,11 @@ Select **Network K-Function** and again use the matched points.
 1. Choose a distance range that is meaningful for the study area.
 2. Start with **NS (exact)** on a small test case or **STARS (approximate)** when approximation is
    acceptable.
-3. For a fast smoke test, disable Monte Carlo or use five simulations.
+3. To try the workflow quickly, disable Monte Carlo or use five simulations.
 4. Run the analysis and inspect the observed curve and result summary.
 
-Monte Carlo simulations are required for a simulation-based theoretical curve
-and lower/upper envelope. Five simulations are useful for software testing but
+Monte Carlo simulations add the reference curve and lower/upper envelope.
+Five simulations are useful for trying the workflow but
 are generally too few for scientific inference.
 
 ## 5. Run ST Network K-Function
@@ -84,13 +84,13 @@ Matplotlib 3D surface.
 - Record the FastNSA version, method, thresholds, bandwidth/lixel length,
   Monte Carlo count, time interpretation, and input-layer identity.
 
-Viewer state and complete run packages are not currently persisted. A QGIS
-project alone is therefore not a complete reproducibility record for charts or
-surface views.
+The chart and surface viewers are not saved with the QGIS project. Export
+the tables and keep your input data and settings if you want to reproduce
+the analysis later.
 
 ## 7. Use Background Execution
 
 Click **Hide Windows & Run in Background** to continue using the map. Restore
 details through the FastNSA toolbar action or the status-bar **Show** button.
-**Cancel** is cooperative; a native phase may take time to reach its next safe
-checkpoint.
+Click **Cancel** to request a stop. Some calculation steps take time to
+respond; wait for confirmation before starting another analysis.
