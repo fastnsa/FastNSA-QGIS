@@ -1,0 +1,38 @@
+name: Authorized one-time privacy cleanup
+
+on:
+  push:
+    branches: ["maintenance/privacy-cleanup-20261030"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fastnsa-qgis-privacy-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: github.repository == 'fastnsa/FastNSA-QGIS'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Execute only the owner-approved cleanup phase
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python qgis/privacy_cleanup_once.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: privacy-cleanup-receipt-${{ github.run_id }}
+          path: privacy-cleanup-receipt.json
+          if-no-files-found: error
+          retention-days: 90
