@@ -120,6 +120,24 @@ def resume(settings):
             'restored_workflow_ids': [w['id'] for w in selected], 'main_checks_requested': True}
 
 
+def finalize(settings):
+    if branch_sha('main') != settings['expected_main_sha']:
+        raise ValueError('Main changed before final verification')
+    release = api('releases/tags/v0.1.2')
+    expected = {f'fastnsa_qgis-0.1.2-{platform}.zip{suffix}'
+                for platform in ('source-only', 'linux-x86_64', 'windows-amd64')
+                for suffix in ('', '.sha256')}
+    if (release.get('draft') is not True or release.get('tag_name') != 'v0.1.2'
+            or len(release.get('assets', [])) != 6
+            or {a['name'] for a in release['assets']} != expected):
+        raise ValueError('Replacement draft is not ready; leave verification available')
+    api('actions/workflows/privacy-cleanup.yml/disable', 'PUT')
+    return {'phase': 'finalize', 'replacement_release': {
+        key: release[key] for key in ('id', 'html_url', 'tag_name', 'draft')},
+        'assets': [{key: asset[key] for key in ('name', 'size', 'digest')}
+                   for asset in release['assets']], 'one_time_workflow_disabled': True}
+
+
 def main():
     check_context()
     settings = json.loads(Path('qgis/privacy-cleanup-phase.json').read_text())
@@ -127,10 +145,14 @@ def main():
         result = cleanup()
     elif settings.get('phase') == 'resume':
         result = resume(settings)
+    elif settings.get('phase') == 'finalize':
+        result = finalize(settings)
     else:
         raise ValueError('Explicit approved phase is required')
     Path('privacy-cleanup-receipt.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result, indent=2))
+    if settings.get('phase') == 'finalize':
+        print('::notice title=Verified replacement draft::' + json.dumps(result))
 
 
 if __name__ == '__main__':

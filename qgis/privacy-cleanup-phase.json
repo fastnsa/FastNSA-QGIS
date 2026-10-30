@@ -1,8 +1,4 @@
 {
-  "phase": "resume",
-  "expected_refs": {
-    "main": "04e0ac2f32aa172f27bcfcf68f0912e3bdc538c2",
-    "release/qgis-0.1.1": "6285261e126704c615fe09c81e30b6eb749b420d",
-    "release/update-v0.1.1-draft": "0fcc947e6aa6e7df795a6cf28361230e823fc4a3"
-  }
+  "phase": "finalize",
+  "expected_main_sha": "04e0ac2f32aa172f27bcfcf68f0912e3bdc538c2"
 }
