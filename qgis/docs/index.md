@@ -1,8 +1,7 @@
 # FastNSA QGIS User Guide
 
 Match event locations to road networks, map density hotspots, and explore
-spatial and temporal clustering in QGIS. This guide covers version `0.1.1`,
-currently being prepared for release.
+spatial and temporal clustering in QGIS. This guide covers version `0.1.2`.
 
 ## Start Here
 

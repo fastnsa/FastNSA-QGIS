@@ -6,7 +6,7 @@ QGIS plugin repository. User-facing installation steps belong in
 
 ## Source-Only Review Candidate
 
-Version 0.1.1 adds `--distribution external` to the packager and a separate
+Version 0.1.2 provides `--distribution external` in the packager and a separate
 `fastnsa-official-repository-candidate` CI artifact. This ZIP contains no
 FastNSA package, native library, wheel, or compiled cache. Validate it using the
 commands in [Development](DEVELOPMENT.md) and test both missing dependencies and
@@ -138,8 +138,9 @@ GitHub's automatic source ZIP is not the installable plugin.
 
 `Prepare or update a release draft` can reuse a successful tag release run.
 Choose the existing tag and its run ID when starting this workflow manually.
-The one-time `release/update-v0.1.1-draft` branch also triggers it for the
-original 0.1.1 tag run. No tag is created or moved by this workflow.
+Both the existing tag and the matching tag-release run ID must be supplied.
+There is no automatic fallback to a historical run. No tag is created or moved
+by this workflow.
 
 It checks the tag commit and required source-run jobs, downloads the three
 installers and source security summary, and verifies their provenance. A

@@ -1,7 +1,7 @@
 # Install FastNSA for QGIS
 
-These instructions describe version `0.1.1`, currently being prepared for
-release. It is not yet available in the official QGIS plugin directory.
+These instructions describe version `0.1.2`. Download available packages from
+GitHub Releases. It is not yet available in the official QGIS plugin directory.
 
 ## Choose an Installation Package
 
@@ -14,15 +14,15 @@ Download released self-contained packages from
 [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases). Choose the
 version you want to install and the archive for your system.
 
-For version 0.1.1 test builds, the package names are:
+For version 0.1.2, the package names are:
 
 | System | Self-contained package |
 | --- | --- |
-| Linux x86_64 | `fastnsa_qgis-0.1.1-linux-x86_64.zip` |
-| Windows AMD64 | `fastnsa_qgis-0.1.1-windows-amd64.zip` |
+| Linux x86_64 | `fastnsa_qgis-0.1.2-linux-x86_64.zip` |
+| Windows AMD64 | `fastnsa_qgis-0.1.2-windows-amd64.zip` |
 
-The source-only test package is
-`fastnsa_qgis-0.1.1-source-only.zip`. If downloading from GitHub Actions,
+The source-only package is
+`fastnsa_qgis-0.1.2-source-only.zip`. If downloading from GitHub Actions,
 choose `fastnsa-official-repository-candidate`, extract the download, and use
 the plugin ZIP inside it.
 

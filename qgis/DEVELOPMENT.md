@@ -64,7 +64,7 @@ python3 -m venv /tmp/fastnsa-security-tools
 /tmp/fastnsa-security-tools/bin/python -m pip install -r qgis/security-requirements.txt
 python3 qgis/package_plugin.py --distribution external --output-dir dist/security-source
 /tmp/fastnsa-security-tools/bin/python qgis/scan_package.py \
-  dist/security-source/fastnsa_qgis-0.1.1-source-only.zip --output-dir dist/security-reports \
+  dist/security-source/fastnsa_qgis-0.1.2-source-only.zip --output-dir dist/security-reports \
   --expected-source-commit "$(git rev-parse HEAD)"
 ```
 

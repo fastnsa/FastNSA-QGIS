@@ -160,25 +160,26 @@ class DraftReleaseTest(unittest.TestCase):
             remote.assert_not_called()
 
     def test_source_run_must_match_tag_and_have_all_required_checks(self):
+        tag = self.ref.removeprefix("refs/tags/")
         jobs = [{"name": name, "head_sha": self.commit, "conclusion": "success"} for name in (
             "checks / packaging-tests", "checks / Source-only QGIS repository candidate",
             "checks / QGIS package / Linux x86_64", "checks / QGIS package / Windows AMD64", "assemble")]
-        run = {"head_sha": self.commit, "head_branch": "v0.1.1", "event": "push",
+        run = {"head_sha": self.commit, "head_branch": tag, "event": "push",
                "path": ".github/workflows/release.yml", "status": "completed", "conclusion": "success",
                "repository": {"full_name": draft.REPOSITORY}}
         with patch.object(draft, "tag_commit", return_value=self.commit), \
                 patch.object(draft, "gh_json", side_effect=[run, {"total_count": len(jobs), "jobs": jobs}]):
-            self.assertEqual(draft.inspect_run("v0.1.1", 123), self.commit)
+            self.assertEqual(draft.inspect_run(tag, 123), self.commit)
         for change in ({"head_sha": "b" * 40}, {"head_branch": "main"}, {"event": "pull_request"}):
             with self.subTest(change=change), patch.object(draft, "tag_commit", return_value=self.commit), \
                     patch.object(draft, "gh_json", return_value={**run, **change}):
                 with self.assertRaisesRegex(ValueError, "Source run"):
-                    draft.inspect_run("v0.1.1", 123)
+                    draft.inspect_run(tag, 123)
         jobs[-1]["conclusion"] = "failure"
         with patch.object(draft, "tag_commit", return_value=self.commit), \
                 patch.object(draft, "gh_json", side_effect=[run, {"total_count": len(jobs), "jobs": jobs}]):
             with self.assertRaisesRegex(ValueError, "has not passed"):
-                draft.inspect_run("v0.1.1", 123)
+                draft.inspect_run(tag, 123)
 
 
 if __name__ == "__main__":

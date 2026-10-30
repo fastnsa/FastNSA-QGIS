@@ -3,11 +3,11 @@ name=FastNSA
 qgisMinimumVersion=3.34
 qgisMaximumVersion=3.99
 description=Explore event patterns along road networks with density maps and K-function analysis.
-version=0.1.1
+version=0.1.2
 author=FastNSA Contributors
 email=fastnsa-group@outlook.com
 about=Study where events concentrate along roads and how their spatial and temporal patterns vary. Match event locations to the network, create density maps with ADA or LION, and explore network K-function results with NS (exact), STARS (approximate), or spatiotemporal methods. Use the FastNSA window for interactive maps and charts, or the Processing Toolbox for repeatable workflows. Supports Linux x86_64 and Windows AMD64 with QGIS 3.34 through 3.x, Qt5, and Python 3.11 or newer. Requires NumPy >= 1.23.5 and a compatible system C++ runtime. The source-only plugin needs the external Python package fastnsa==0.3.0 installed separately; the self-contained GitHub packages already include it. Open FastNSA > Runtime setup for step-by-step installation help. Packages are not installed automatically. Matplotlib is optional for interactive 3D views; other analyses work without it. macOS and QGIS 4/Qt6 are not supported in this release.
-changelog=0.1.1: Easier first-time setup with installation help and automatic detection of FastNSA in the recommended folder. First-time setup can enable the tools without restarting QGIS. Adds a source-only installation option alongside the self-contained Windows and Linux packages.
+changelog=0.1.2: Replaces the withdrawn 0.1.1 release. Includes source-only and self-contained installation options, clearer first-time setup, and consistent download names. The four analysis workflows and FastNSA 0.3.0 remain unchanged.
 tracker=https://github.com/fastnsa/FastNSA-QGIS/issues
 repository=https://github.com/fastnsa/FastNSA-QGIS
 homepage=https://github.com/fastnsa/FastNSA-QGIS

@@ -77,10 +77,11 @@ and configure an analysis from one window.
 Download the **plugin ZIP for your platform** from
 [GitHub Releases](https://github.com/fastnsa/FastNSA-QGIS/releases).
 
-| Platform | Version 0.1.0 package |
+| Installation | Version 0.1.2 package |
 | --- | --- |
-| Linux x86_64 | `fastnsa_qgis-0.1.0-linux-x86_64.zip` |
-| Windows AMD64 | `fastnsa_qgis-0.1.0-windows-amd64.zip` |
+| Linux x86_64, self-contained | `fastnsa_qgis-0.1.2-linux-x86_64.zip` |
+| Windows AMD64, self-contained | `fastnsa_qgis-0.1.2-windows-amd64.zip` |
+| Source-only, either platform | `fastnsa_qgis-0.1.2-source-only.zip` |
 
 1. In QGIS, open **Plugins > Manage and Install Plugins > Install from ZIP**.
 2. Select the downloaded plugin ZIP and enable **FastNSA**.
@@ -88,7 +89,8 @@ Download the **plugin ZIP for your platform** from
    are also listed under **Processing Toolbox > FastNSA**.
 
 Use the platform-specific plugin ZIP, not GitHub's **Source code** archive.
-The package includes FastNSA 0.3.0; no separate FastNSA installation is needed.
+The self-contained packages include FastNSA 0.3.0; no separate FastNSA
+installation is needed for those packages.
 
 **Source-only installations:** These need `fastnsa==0.3.0` installed separately.
 Open **FastNSA > Runtime setup** for guidance, or follow the

@@ -3,8 +3,7 @@
 For the project introduction, screenshots, and downloads, visit the
 [FastNSA-QGIS homepage](https://github.com/fastnsa/FastNSA-QGIS).
 
-This page accompanies plugin version `0.1.1` and is included in the plugin ZIP.
-Version 0.1.1 is being prepared for release.
+This page accompanies plugin version `0.1.2` and is included in the plugin ZIP.
 
 ## Installation
 

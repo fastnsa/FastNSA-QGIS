@@ -1,17 +1,14 @@
 name: Prepare or update a release draft
 
 on:
-  push:
-    branches: ["release/update-v0.1.1-draft"]
   workflow_dispatch:
     inputs:
       tag:
         description: Existing release tag (never moved)
-        default: v0.1.1
+        default: v0.1.2
         required: true
       run_id:
         description: Tag release workflow run containing the installers
-        default: "41000468564"
         required: true
   workflow_call:
     inputs:
@@ -27,12 +24,12 @@ permissions:
   actions: read
 
 concurrency:
-  group: fastnsa-qgis-draft-${{ inputs.tag || 'v0.1.1' }}
+  group: fastnsa-qgis-draft-${{ inputs.tag }}
   cancel-in-progress: false
 
 env:
-  TARGET_TAG: ${{ inputs.tag || 'v0.1.1' }}
-  SOURCE_RUN_ID: ${{ inputs.run_id || '41000468564' }}
+  TARGET_TAG: ${{ inputs.tag }}
+  SOURCE_RUN_ID: ${{ inputs.run_id }}
 
 jobs:
   prepare:
