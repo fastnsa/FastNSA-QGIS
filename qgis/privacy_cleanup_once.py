@@ -123,7 +123,10 @@ def resume(settings):
 def finalize(settings):
     if branch_sha('main') != settings['expected_main_sha']:
         raise ValueError('Main changed before final verification')
-    release = api('releases/tags/v0.1.2')
+    matches = [row for row in api('releases?per_page=100') if row.get('tag_name') == 'v0.1.2']
+    if len(matches) != 1:
+        raise ValueError('Expected exactly one replacement release in authenticated inventory')
+    release = matches[0]
     expected = {f'fastnsa_qgis-0.1.2-{platform}.zip{suffix}'
                 for platform in ('source-only', 'linux-x86_64', 'windows-amd64')
                 for suffix in ('', '.sha256')}
@@ -156,4 +159,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as error:
+        print('::error title=Maintenance verification stopped::' + str(error))
+        raise
