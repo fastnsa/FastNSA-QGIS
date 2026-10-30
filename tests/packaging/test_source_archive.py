@@ -22,7 +22,7 @@ class SourceArchiveTest(unittest.TestCase):
             with patch.object(builder, "PYTHON_SOURCE", root / "absent"), \
                     patch.object(builder, "target_platform", side_effect=AssertionError("No host selection")):
                 archive = builder.build_archive(root / "dist", distribution="external")
-            self.assertTrue(archive.name.endswith("-qgis-repository.zip"))
+            self.assertTrue(archive.name.endswith("-source-only.zip"))
             with zipfile.ZipFile(archive) as zipped:
                 names = zipped.namelist()
                 self.assertFalse(any(name.startswith("fastnsa_qgis/fastnsa/") for name in names))

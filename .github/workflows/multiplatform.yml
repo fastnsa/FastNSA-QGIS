@@ -67,7 +67,7 @@ jobs:
           printf '%s\n' \
             '## Source-only acceptance package' \
             'Download **fastnsa-official-repository-candidate** from this run.' \
-            'Extract the Actions download, then install the inner `fastnsa_qgis-*-qgis-repository.zip` in QGIS.' \
+            'Extract the Actions download, then install the inner `fastnsa_qgis-*-source-only.zip` in QGIS.' \
             'This package requires external fastnsa==0.3.0. It is not yet an approved official-repository release.' \
             'Use a separate clean QGIS profile from the bundled-package test.' \
             'Security summary: **fastnsa-source-security-report** (includes the ZIP SHA-256 and source commit).' \

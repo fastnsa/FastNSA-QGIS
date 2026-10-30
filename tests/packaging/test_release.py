@@ -138,21 +138,26 @@ class ReleaseTest(unittest.TestCase):
         workflow = archive_tests.plugin_workflow("release.yml").read_text()
         self.assertIn("workflow_dispatch:", workflow)
         self.assertIn("github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')", workflow)
-        self.assertIn("--verify-tag --draft", workflow)
-        self.assertIn("--notes-file release/RELEASE_NOTES.md", workflow)
+        self.assertIn("uses: ./.github/workflows/draft-release.yml", workflow)
+        self.assertIn("run_id: ${{ github.run_id }}", workflow)
         self.assertIn("contents: write", workflow)
         self.assertIn("git merge-base --is-ancestor", workflow)
         self.assertNotIn("secrets: inherit", workflow)
         self.assertNotIn("environment:", workflow)
 
-    def test_workflow_keeps_full_archive_but_publishes_only_installers_and_hashes(self):
+    def test_workflow_keeps_platform_archive_and_delegates_six_asset_draft(self):
         workflow = archive_tests.plugin_workflow("release.yml").read_text()
-        upload = workflow.split('gh release create "$RELEASE_TAG"', 1)[1].split("--verify-tag", 1)[0]
-        self.assertEqual(upload.split(), ["release/*.zip", "release/*.sha256"])
         self.assertIn("path: release/*", workflow)
         self.assertIn("retention-days: 90", workflow)
-        self.assertIn("release_plugin.py verify --bundle-dir release", workflow)
-        self.assertLess(workflow.index("Recheck release bundle"), workflow.index("gh release create"))
+        draft_workflow = archive_tests.plugin_workflow("draft-release.yml").read_text()
+        for text in ("draft_release.py inspect-run", "draft_release.py prepare", "draft_release.py publish",
+                     "name: fastnsa-official-repository-candidate", "name: fastnsa-source-security-report",
+                     "name: fastnsa-qgis-linux-x86_64", "name: fastnsa-qgis-windows-amd64",
+                     "--expected-source-commit", "actions: read", "contents: write"):
+            self.assertIn(text, draft_workflow)
+        self.assertNotIn("secrets: inherit", draft_workflow)
+        self.assertNotIn("continue-on-error", draft_workflow)
+        self.assertIn("needs: prepare", draft_workflow)
 
 
 if __name__ == "__main__":

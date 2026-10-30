@@ -1,0 +1,129 @@
+name: Prepare or update a release draft
+
+on:
+  push:
+    branches: ["release/update-v0.1.1-draft"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (never moved)
+        default: v0.1.1
+        required: true
+      run_id:
+        description: Tag release workflow run containing the installers
+        default: "41000468564"
+        required: true
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      run_id:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: fastnsa-qgis-draft-${{ inputs.tag || 'v0.1.1' }}
+  cancel-in-progress: false
+
+env:
+  TARGET_TAG: ${{ inputs.tag || 'v0.1.1' }}
+  SOURCE_RUN_ID: ${{ inputs.run_id || '41000468564' }}
+
+jobs:
+  prepare:
+    if: github.repository == 'fastnsa/FastNSA-QGIS'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    outputs:
+      commit: ${{ steps.provenance.outputs.commit }}
+      version: ${{ steps.provenance.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify immutable tag and source-run checks
+        id: provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python qgis/draft_release.py inspect-run --tag "$TARGET_TAG"
+          --run-id "$SOURCE_RUN_ID" --github-output "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastnsa-official-repository-candidate
+          path: incoming/source
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastnsa-source-security-report
+          path: incoming/security
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastnsa-qgis-linux-x86_64
+          path: incoming/platforms/linux
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastnsa-qgis-windows-amd64
+          path: incoming/platforms/windows
+          github-token: ${{ github.token }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - name: Rename without rebuilding and regenerate source validation
+        env:
+          TAG_COMMIT: ${{ steps.provenance.outputs.commit }}
+        run: >-
+          python qgis/draft_release.py prepare --tag "$TARGET_TAG" --source-commit "$TAG_COMMIT"
+          --source-dir incoming/source --platform-dir incoming/platforms
+          --security-summary incoming/security/summary.json --output-dir prepared
+      - name: Scan the renamed source installer
+        env:
+          TAG_COMMIT: ${{ steps.provenance.outputs.commit }}
+        run: |
+          python -m pip --isolated install --requirement qgis/security-requirements.txt
+          python qgis/scan_package.py prepared/*-source-only.zip --output-dir security-new --expected-source-commit "$TAG_COMMIT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fastnsa-draft-downloads-${{ steps.provenance.outputs.version }}
+          path: |
+            prepared/*
+            security-new/summary.json
+          if-no-files-found: error
+          retention-days: 90
+
+  draft:
+    needs: prepare
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastnsa-draft-downloads-${{ needs.prepare.outputs.version }}
+          path: draft
+      - name: Update only a draft with six verified attachments
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_COMMIT: ${{ needs.prepare.outputs.commit }}
+        run: >-
+          python qgis/draft_release.py publish --tag "$TARGET_TAG" --source-commit "$TAG_COMMIT"
+          --asset-dir draft/prepared --security-summary draft/security-new/summary.json

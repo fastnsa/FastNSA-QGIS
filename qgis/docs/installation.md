@@ -22,7 +22,7 @@ For version 0.1.1 test builds, the package names are:
 | Windows AMD64 | `fastnsa_qgis-0.1.1-windows-amd64.zip` |
 
 The source-only test package is
-`fastnsa_qgis-0.1.1-qgis-repository.zip`. If downloading from GitHub Actions,
+`fastnsa_qgis-0.1.1-source-only.zip`. If downloading from GitHub Actions,
 choose `fastnsa-official-repository-candidate`, extract the download, and use
 the plugin ZIP inside it.
 

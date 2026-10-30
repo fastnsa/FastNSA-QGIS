@@ -68,31 +68,10 @@ jobs:
   github-release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: [preflight, assemble]
-    runs-on: ubuntu-22.04
+    uses: ./.github/workflows/draft-release.yml
+    with:
+      tag: ${{ needs.preflight.outputs.tag }}
+      run_id: ${{ github.run_id }}
     permissions:
       contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: actions/download-artifact@v4
-        with:
-          name: fastnsa-qgis-release-${{ needs.preflight.outputs.version }}
-          path: release
-      - name: Recheck release bundle
-        run: >-
-          python qgis/release_plugin.py verify --bundle-dir release
-          --source-commit "$GITHUB_SHA" --source-ref "$GITHUB_REF"
-      - name: Create draft GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ needs.preflight.outputs.tag }}
-          RELEASE_VERSION: ${{ needs.preflight.outputs.version }}
-        run: >-
-          gh release create "$RELEASE_TAG" release/*.zip release/*.sha256
-          --verify-tag --draft --title "FastNSA for QGIS $RELEASE_VERSION"
-          --notes-file release/RELEASE_NOTES.md
+      actions: read

@@ -112,27 +112,52 @@ The tag must match metadata exactly and its commit must be reachable from
 rebuilds both archives and verifies versions, source commit, runtime hashes,
 ABI, checksums, embedded build information, and runtime reports before drafting.
 
-The public draft contains only four download assets:
+The public draft contains six download assets:
 
-- Linux and Windows installable plugin ZIPs;
+- Linux and Windows self-contained plugin ZIPs and one source-only plugin ZIP;
 - the matching per-archive `.zip.sha256` files.
 
 Release notes are used as the page body, not uploaded as another attachment.
-The complete verified bundle, including build information, runtime reports,
+The verified platform bundle, including build information, runtime reports,
 `manifest.json`, `SHA256SUMS`, and release notes, remains in the Actions artifact
 `fastnsa-qgis-release-<version>` for 90 days. Archive that artifact separately
 before expiration if long-term maintenance evidence is needed. Do not upload
-its aggregate checksum inventory by itself alongside the four public assets:
+its aggregate checksum inventory by itself alongside the public assets:
 it also references the maintenance files that are not public attachments.
 
 Local `release_plugin.py verify` requires this full CI bundle, not just the
-four public downloads. End users can check each installer with its individual
+platform downloads. End users can check each installer with its individual
 `.zip.sha256` file. The plugin archive itself also retains `build-info.json`.
 
 After final ZIP smoke tests, review the draft notes and assets, then select
 **Publish release**. A draft release is not public; neither are releases in a
 private repository. Making the repository public is a separate owner decision.
 GitHub's automatic source ZIP is not the installable plugin.
+
+## Update a Draft Without Moving Its Tag
+
+`Prepare or update a release draft` can reuse a successful tag release run.
+Choose the existing tag and its run ID when starting this workflow manually.
+The one-time `release/update-v0.1.1-draft` branch also triggers it for the
+original 0.1.1 tag run. No tag is created or moved by this workflow.
+
+It checks the tag commit and required source-run jobs, downloads the three
+installers and source security summary, and verifies their provenance. A
+legacy `qgis-repository.zip` is copied to `source-only.zip` without changing
+any ZIP bytes. Its checksum filename/content is regenerated, and source
+validation and scanning are rerun. Runtime reports are not fabricated.
+
+The workflow prepares updated notes from the preparation revision, separate
+from the immutable installer source commit, and saves this distinction in
+`SOURCE_RENAME.json`. The complete draft inputs and new security summary are
+retained for 90 days as `fastnsa-draft-downloads-<version>`.
+
+Only the final job has `contents: write`. It updates an existing draft or
+creates one if absent, verifies existing attachment bytes before reusing
+them, and uploads only missing ZIP/checksum assets. Different same-name or
+unexpected attachments stop the operation; they are not deleted or clobbered.
+An already published release is never converted back into a draft. Final
+publication still requires a separate manual decision.
 
 ## Failure Handling
 

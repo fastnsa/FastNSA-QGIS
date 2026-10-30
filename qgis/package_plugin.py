@@ -234,7 +234,7 @@ def build_archive(
     config.read(PLUGIN_SOURCE / "metadata.txt", encoding="utf-8")
     version = config.get("general", "version")
     platform_tag = (f"{platform.system().lower()}-{platform.machine().lower()}"
-                    if distribution == "bundled" else "qgis-repository")
+                    if distribution == "bundled" else "source-only")
     output_dir.mkdir(parents=True, exist_ok=True)
     archive_path = output_dir / f"fastnsa_qgis-{version}-{platform_tag}.zip"
     if archive_path.exists():
